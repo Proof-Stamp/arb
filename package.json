@@ -12,9 +12,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "schema:check": "node scripts/register-schema.mjs --check",
-    "schema:register": "node scripts/register-schema.mjs"
+    "test:watch": "vitest"
   },
   "engines": {
     "node": ">=22.13.0"
