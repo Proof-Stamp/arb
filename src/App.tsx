@@ -248,7 +248,14 @@ export default function App() {
       <footer>
         <p>
           A ProofStamp can show that specific bytes were recorded at a time. It does not prove that
-          the content itself is true or authentic.
+          the content itself is true or authentic. · Build reference:{' '}
+          <a
+            href="https://github.com/Proof-Stamp/arb/commit/fe5f0713a05e2975ac6916cdbd18e58101753ec1"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <code>fe5f0713</code>
+          </a>
         </p>
       </footer>
     </main>
