@@ -1,7 +1,7 @@
 import { useLoginPasskey, useRegisterPasskey } from '@zerodev/wallet-react';
 import { useState } from 'react';
 import { parseEventLogs, zeroAddress, type Hex } from 'viem';
-import { useAccount, useSendTransaction } from 'wagmi';
+import { useAccount, useDisconnect, useSendTransaction } from 'wagmi';
 import { WalletProviders } from './WalletProviders';
 import { ARBITRUM_SEPOLIA_CHAIN_ID } from './config/arbitrum';
 import { createArbitrumSepoliaPublicClient, readEasAttestation, readProofStampSchema } from './lib/eas/client';
@@ -33,6 +33,10 @@ interface BlockchainFlowProps {
   onError: (message: string) => void;
 }
 
+function shortAddress(address: string): string {
+  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+}
+
 async function assertProofStampSchemaReady(): Promise<void> {
   const schema = await readProofStampSchema(ARBITRUM_SEPOLIA_RPC_URL);
 
@@ -51,6 +55,7 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
   const { address, isConnected } = useAccount();
   const registerPasskey = useRegisterPasskey();
   const loginPasskey = useLoginPasskey();
+  const disconnect = useDisconnect();
   const sendTransaction = useSendTransaction();
 
   const isAuthenticating = registerPasskey.isPending || loginPasskey.isPending;
@@ -67,6 +72,11 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
     } catch (caught) {
       onError(caught instanceof Error ? caught.message : 'Unable to continue with this passkey.');
     }
+  }
+
+  function handleDisconnect(): void {
+    onError('');
+    disconnect.disconnect();
   }
 
   async function handleRecord(): Promise<void> {
@@ -160,7 +170,10 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
       ) : (
         <div className="next-step">
           <strong>Ready to record</strong>
-          <p>Only the SHA-256 fingerprint will be placed in the public attestation.</p>
+          <p>
+            Passkey session active{address ? ` · ${shortAddress(address)}` : ''}. Only the SHA-256
+            fingerprint will be placed in the public attestation.
+          </p>
           <button
             className="primary compact"
             type="button"
@@ -169,6 +182,14 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
           >
             {isRecording || sendTransaction.isPending ? 'Creating ProofStamp…' : 'Create ProofStamp'}
           </button>
+          <button
+            className="secondary"
+            type="button"
+            disabled={isRecording || sendTransaction.isPending || disconnect.isPending}
+            onClick={handleDisconnect}
+          >
+            {disconnect.isPending ? 'Disconnecting…' : 'Use another passkey'}
+          </button>
         </div>
       )}
 
@@ -176,6 +197,8 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
         <details>
           <summary>Wallet details</summary>
           <div className="result">
+            <span>Passkey session</span>
+            <code>Active</code>
             <span>Attester address</span>
             <code>{address}</code>
           </div>
