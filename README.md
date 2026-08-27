@@ -1,32 +1,48 @@
-# ProofStamp on Arbitrum
+# ProofStamp via Arbitrum
 
-ProofStamp is an open-source experiment for creating independently verifiable proofs of digital files using local SHA-256 hashing and a public blockchain record.
+Create independently verifiable evidence for a file without uploading the file itself.
 
-This repository contains the Arbitrum implementation. Development starts on **Arbitrum Sepolia**.
+> **Status:** Arbitrum Sepolia testnet preview. Experimental software, not a production service.
 
-> **Status:** early development. This repository is not ready for production use.
+## How it works
 
-## What ProofStamp does
+```text
+choose file
+→ SHA-256 locally in the browser
+→ passkey
+→ sponsored Arbitrum Sepolia transaction
+→ EAS content-hash attestation
+→ direct on-chain read-back
+→ ProofStamp receipt
+```
 
-The intended flow is simple:
+The original file stays on the user's device. The app records its SHA-256 fingerprint, then verifies the new attestation directly from Ethereum Attestation Service before reporting success.
 
-1. A user selects a file.
-2. The browser calculates SHA-256 over the exact file bytes.
-3. Only the resulting proof data is anchored publicly.
-4. A verifier can hash their copy of the file locally and compare it with the public record.
+The **Check** flow is independent of the creation wallet. A verifier chooses the original file and either uploads the saved ProofStamp `.txt` receipt or pastes its Proof ID. The browser hashes the file locally, reads EAS directly, and compares the fingerprints.
 
-The file itself is not uploaded as part of the stamping or verification flow.
+## What is public
 
-A ProofStamp is evidence that a specific hash was recorded at a particular blockchain state. It does **not** prove that the underlying content is truthful or authentic.
+Only proof data is intended to be public. V0 records the SHA-256 content hash through EAS. The blockchain also exposes normal transaction metadata such as the attester address, transaction hash, block and timestamp.
 
-## Principles
+ProofStamp does not put the original filename or file contents on-chain.
 
-- **Private file:** file bytes stay on the user's device.
-- **Deterministic hash:** SHA-256 is calculated locally over the exact bytes.
-- **Minimal public data:** avoid putting filenames, personal data, or unnecessary metadata on-chain.
-- **Independent verification:** verification should not depend on ProofStamp remaining online.
-- **No crypto UX requirement:** normal users should not need seed phrases, gas, or token balances.
-- **Standard primitives:** prefer established protocols over custom cryptography or unnecessary smart contracts.
+A public hash is not anonymous: someone who already has a candidate file can hash it and test for a match. Repeated attestations from the same address may also be correlated. See [PRIVACY.md](PRIVACY.md).
+
+## Testnet configuration
+
+| Item | Value |
+| --- | --- |
+| Network | Arbitrum Sepolia |
+| Chain ID | `421614` |
+| EAS | `0x2521021fc8BF070473E1e1801D3c7B4aB701E1dE` |
+| SchemaRegistry | `0x45CB6Fa0870a8Af06796Ac15915619a0f22cd475` |
+| EAS schema | `bytes32 contentHash` |
+| Schema UID | `0xdf4c41ea0f6263c72aa385580124f41f2898d3613e86c50519fc3cfd7ff13ad4` |
+| Revocable | `true` |
+
+V0 reuses the standard EAS **Content Hash** schema. ProofStamp-specific non-revocable semantics can be introduced later without changing the SHA-256 file-fingerprint format.
+
+The SHA-256 digest is stored as the exact 32 bytes of `contentHash`. It is not re-hashed with Keccak and is not encoded as UTF-8 hexadecimal text.
 
 ## Stack
 
@@ -34,123 +50,21 @@ A ProofStamp is evidence that a specific hash was recorded at a particular block
 - Cloudflare Pages
 - Arbitrum Sepolia
 - Ethereum Attestation Service (EAS)
-- Viem for typed EVM reads and ABI encoding
-- ZeroDev planned for passkey-based smart accounts and sponsored transactions
+- ZeroDev for passkey wallet access and constrained gas sponsorship
+- Viem / Wagmi for EVM reads and transactions
 
-## Arbitrum Sepolia + EAS configuration
-
-The V0 chain configuration is deliberately pinned in source code.
-
-| Item | Value |
-| --- | --- |
-| Chain | Arbitrum Sepolia |
-| Chain ID | `421614` |
-| EAS | `0x2521021fc8BF070473E1e1801D3c7B4aB701E1dE` |
-| SchemaRegistry | `0x45CB6Fa0870a8Af06796Ac15915619a0f22cd475` |
-
-The deployment values were verified against the official `ethereum-attestation-service/eas-contracts` repository at commit `e6e970286ff18bbdfc5d8eff2742c5ece46040e4`.
-
-The ProofStamp V1 EAS schema is intentionally minimal:
-
-```text
-bytes32 contentHash
-```
-
-Schema properties:
-
-- resolver: zero address
-- revocable: `false`
-- expected schema UID: `0x5c5b8b295ff43c8e442be11d569e94a4cd5476f5e23df0f71bdd408df6b9649c`
-
-The schema UID is derived deterministically using the same packed encoding and Keccak-256 rule as the EAS SchemaRegistry contract. The expected UID is pinned in source and the test suite independently recomputes it from the schema definition, resolver, and revocability flag.
-
-The schema has not been registered by this repository yet. Registration is a separate, explicit maintainer action. Once registered with the values above, the returned UID must match the pinned value before we proceed.
-
-### One-time schema registration
-
-The repository contains a deliberately narrow registration script. It first recomputes the expected UID, checks the connected chain, and reads the SchemaRegistry. If the schema already exists and matches, it exits without sending a transaction.
-
-Read-only check:
-
-```bash
-npm run schema:check
-```
-
-Optional RPC override:
-
-```bash
-ARBITRUM_SEPOLIA_RPC_URL=https://your-rpc.example npm run schema:check
-```
-
-To register the schema, use a dedicated funded **testnet maintainer wallet** and provide its private key only as a process environment variable:
-
-```bash
-PROOFSTAMP_MAINTAINER_PRIVATE_KEY=0x... npm run schema:register
-```
-
-Never put this private key in a `VITE_*` variable, `.env.example`, GitHub issue, PR, CI log, or committed file. The script verifies the resulting on-chain schema after the transaction and prints the Arbiscan transaction link and block number.
-
-## Hash encoding rule
-
-The browser-generated SHA-256 digest is already exactly 32 bytes. ProofStamp stores those exact bytes as `contentHash`.
-
-It must **not** be hashed again, converted with Keccak-256, or encoded as the UTF-8 text of the hexadecimal string.
-
-The unit tests enforce this rule using the standard SHA-256 value for `abc` and confirm that EAS encoding preserves the exact 32-byte digest.
-
-## Current implementation
-
-The first web preview is deliberately user-facing. A tester can choose a file and press **Create ProofStamp**. The browser performs SHA-256 locally and hides the fingerprint under technical details. The preview then states clearly that it stops before the blockchain transaction.
-
-The bootstrap application currently includes:
-
-- local SHA-256 hashing with the browser Web Crypto API
-- known SHA-256 test vectors
-- a temporary 100 MB V0 browser-hashing limit
-- a normal-user file-selection flow with technical details secondary
-- pinned Arbitrum Sepolia and official EAS contract configuration
-- pinned, deterministic ProofStamp V1 schema identity
-- exact `bytes32 contentHash` encoding and decoding tests
-- direct Viem helpers for `EAS.getAttestation(uid)` and `SchemaRegistry.getSchema(uid)`
-- guarded one-time EAS schema registration tooling for maintainers
-
-Blockchain ProofStamp writes, passkeys, gas sponsorship, and receipt routes are not enabled yet.
-
-## Independent verification architecture
-
-The verification path is designed to read EAS directly rather than depend on an indexer or ProofStamp backend:
-
-```text
-file bytes
-   ↓
-local SHA-256
-   ↓
-contentHash
-   ↓
-Arbitrum Sepolia RPC
-   ↓
-EAS.getAttestation(uid)
-   ↓
-decode bytes32 contentHash
-   ↓
-compare
-```
-
-EAS explorers and blockchain explorers can be linked for convenience, but they are not intended to be the cryptographic verification dependency.
+There is no ProofStamp application database or file-upload API in this V0.
 
 ## Development
 
-Requirements:
-
-- Node.js 22 or newer
-- npm
+Requires Node.js 22+ and npm.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Quality checks:
+Before a PR:
 
 ```bash
 npm run lint
@@ -160,44 +74,18 @@ npm test
 npm run build
 ```
 
-## Cloudflare Pages
+Public browser configuration is documented in [.env.example](.env.example). Never put secrets in `VITE_*` variables; Vite embeds them in browser JavaScript.
 
-The app is static-first and designed to deploy directly from this repository.
+Cloudflare deployment notes are in [docs/cloudflare-pages.md](docs/cloudflare-pages.md).
 
-- Build command: `npm run build`
-- Build output: `dist`
-- Production branch: `main`
-- Feature branches: Cloudflare Pages preview deployments
-- SPA fallback: `public/_redirects`
-- Baseline response headers: `public/_headers`
+## Project documents
 
-See [docs/cloudflare-pages.md](docs/cloudflare-pages.md) for the browser-preview deployment setup and passkey-domain note.
+- [Security](SECURITY.md)
+- [Privacy](PRIVACY.md)
+- [Disclaimer](DISCLAIMER.md)
+- [Contributing](CONTRIBUTING.md)
+- [MIT License](LICENSE)
 
-A Content Security Policy will be added once the exact ZeroDev and Arbitrum RPC connections are known. It should be restrictive enough to be useful rather than added prematurely and then weakened to make the app work.
+## Scope
 
-`VITE_ARBITRUM_SEPOLIA_RPC_URL` is an optional public RPC override. Do not put secrets in `VITE_*` variables. Vite embeds those values in browser JavaScript.
-
-## Planned V0 milestones
-
-1. Local SHA-256 hashing and browser preview
-2. Arbitrum Sepolia and EAS configuration
-3. Register one immutable ProofStamp EAS schema
-4. ZeroDev passkey account and constrained gas sponsorship
-5. Create an EAS attestation containing the file hash
-6. Receipt with EAS UID, transaction, block, network, and SHA-256
-7. Independent `/verify` flow using a direct EAS contract read
-8. Public-repository and security audit before launch
-
-## Security
-
-See [SECURITY.md](SECURITY.md).
-
-The public hash and attester address have privacy implications. A party that already has a candidate file can hash it and test whether it matches a public ProofStamp, and repeated attestations from one address can be correlated. Those properties must be described accurately in the product UX.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## License
-
-MIT. See [LICENSE](LICENSE).
+A ProofStamp can provide evidence that a particular file fingerprint was recorded on a public blockchain at a particular time. It does **not** prove authorship, ownership, truth, authenticity, legality, or when the underlying content was originally created. See [DISCLAIMER.md](DISCLAIMER.md).
