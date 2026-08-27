@@ -17,6 +17,10 @@ const connectors = IS_ZERODEV_CONFIGURED
         aaHost: 'https://rpc.zerodev.app',
         chains: [ARBITRUM_SEPOLIA_CHAIN],
         mode: '7702',
+        // Do not initialize the remote wallet during page startup. A temporary
+        // ACL/project configuration problem must not blank the entire app.
+        // ZeroDev initializes lazily when the user starts passkey auth.
+        autoInitialize: false,
         ...(ZERO_DEV_RP_ID ? { rpId: ZERO_DEV_RP_ID } : {}),
       }),
     ]
