@@ -51,6 +51,13 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function proofStampReceiptFilename(originalName: string): string {
+  const safeName = originalName.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_').trim() || 'file';
+  const lastDot = safeName.lastIndexOf('.');
+  const baseName = lastDot > 0 ? safeName.slice(0, lastDot) : safeName;
+  return `${baseName}_proofstamp.txt`;
+}
+
 function isBytes32(value: string): value is `0x${string}` {
   return /^0x[0-9a-fA-F]{64}$/.test(value);
 }
@@ -224,8 +231,7 @@ export default function App() {
 
     setError('');
     setTechnicalError('');
-    const safeFileName = file.name.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_').trim() || 'file';
-    downloadText(receiptToText(proof, hash), `${safeFileName}_proofstamp.txt`);
+    downloadText(receiptToText(proof, hash), proofStampReceiptFilename(file.name));
   }
 
   function handleCheckFileChange(nextFile: File | null): void {
@@ -285,14 +291,14 @@ export default function App() {
       const attestation = await readEasAttestation(proofId);
 
       if (attestation.uid.toLowerCase() !== proofId.toLowerCase()) {
-        throw new Error('No attestation was found for this Proof ID on Arbitrum Sepolia.');
+        throw new Error('Blockchain record not found for this Proof ID on Arbitrum Sepolia.');
       }
 
       if (
         attestation.schema.toLowerCase() !== PROOFSTAMP_SCHEMA_UID.toLowerCase() ||
         attestation.recipient.toLowerCase() !== zeroAddress.toLowerCase()
       ) {
-        throw new Error('This Proof ID is not a supported ProofStamp Content Hash attestation.');
+        throw new Error('Blockchain record found, but it is not a valid ProofStamp record.');
       }
 
       const recordedHash = decodeProofStampData(attestation.data) as Sha256Hex;
@@ -308,7 +314,7 @@ export default function App() {
         revoked,
       });
     } catch (caught) {
-      setCheckError(caught instanceof Error ? caught.message : 'Unable to check this ProofStamp.');
+      setCheckError(caught instanceof Error ? caught.message : 'Unable to verify against Arbitrum.');
     } finally {
       setIsChecking(false);
     }
@@ -536,10 +542,10 @@ export default function App() {
           ) : (
             <section id="check-panel" className="panel" role="tabpanel">
               <div className="check-intro">
-                <h2>Check a ProofStamp</h2>
+                <h2>Verify against Arbitrum</h2>
                 <p>
                   Choose the original file, then upload its saved ProofStamp receipt or paste the Proof ID.
-                  Everything is read locally before the public Arbitrum attestation is checked.
+                  The receipt only identifies the record. Your file is hashed locally and compared with the public EAS record read directly from Arbitrum Sepolia.
                 </p>
               </div>
 
@@ -607,7 +613,7 @@ export default function App() {
                 disabled={!checkFile || !checkProofId.trim() || isChecking}
                 onClick={() => void handleCheck()}
               >
-                {isChecking ? 'Checking ProofStamp…' : 'Check ProofStamp'}
+                {isChecking ? 'Checking Arbitrum…' : 'Verify against Arbitrum'}
               </button>
 
               {checkResult ? (
@@ -616,19 +622,42 @@ export default function App() {
                   <div>
                     <h3>
                       {checkResult.matches
-                        ? 'ProofStamp matches this file'
+                        ? 'Verified against Arbitrum'
                         : checkResult.revoked
-                          ? 'This ProofStamp was revoked'
-                          : 'This file does not match'}
+                          ? 'Blockchain record revoked'
+                          : 'File does not match blockchain record'}
                     </h3>
                     <p>
                       {checkResult.matches
-                        ? `The exact file fingerprint was recorded on Arbitrum Sepolia at ${checkResult.recordedAt}.`
+                        ? `The SHA-256 fingerprint of this file matches the ProofStamp recorded on Arbitrum Sepolia at ${checkResult.recordedAt}.`
                         : checkResult.revoked
-                          ? 'The attestation exists, but it has been revoked and should not be treated as valid.'
-                          : 'The file fingerprint does not match the fingerprint stored in this attestation.'}
+                          ? 'The ProofStamp record was found on Arbitrum Sepolia, but it has been revoked and should not be treated as valid.'
+                          : 'The ProofStamp record was found and its schema is valid, but the SHA-256 fingerprint does not match this file.'}
                     </p>
                   </div>
+
+                  <div
+                    aria-label="Blockchain verification checks"
+                    style={{
+                      gridColumn: '1 / -1',
+                      display: 'grid',
+                      gap: '8px',
+                      marginTop: '4px',
+                    }}
+                  >
+                    <div><strong>✓ Blockchain record found</strong> · Arbitrum Sepolia</div>
+                    <div><strong>✓ ProofStamp schema valid</strong> · EAS record</div>
+                    <div>
+                      <strong>
+                        {checkResult.revoked
+                          ? '✕ Blockchain record revoked'
+                          : checkResult.fileHash.toLowerCase() === checkResult.recordedHash.toLowerCase()
+                            ? '✓ File fingerprint matches'
+                            : '✕ File fingerprint does not match'}
+                      </strong>
+                    </div>
+                  </div>
+
                   <details>
                     <summary>Technical details</summary>
                     <div className="result">
@@ -638,8 +667,14 @@ export default function App() {
                       <code>{checkResult.fileHash}</code>
                       <span>Recorded SHA-256</span>
                       <code>{checkResult.recordedHash}</code>
+                      <span>Recorded at</span>
+                      <code>{checkResult.recordedAt}</code>
                       <span>Attester</span>
                       <code>{checkResult.attester}</code>
+                      <span>ProofStamp schema</span>
+                      <code>{PROOFSTAMP_SCHEMA_UID}</code>
+                      <span>Verification source</span>
+                      <code>Arbitrum Sepolia · EAS getAttestation</code>
                       <span>Network</span>
                       <code>Arbitrum Sepolia · chain ID {ARBITRUM_SEPOLIA_CHAIN_ID}</code>
                     </div>
