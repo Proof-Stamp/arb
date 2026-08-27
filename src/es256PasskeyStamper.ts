@@ -41,6 +41,11 @@ export async function createEs256PasskeyStamper({
       const encodedChallenge = base64UrlEncode(challenge);
       const authenticatorUserId = generateRandomBuffer();
 
+      console.info('[ProofStamp] ES256-only passkey registration active', {
+        rpId: options.rp.id,
+        algorithms: [-7],
+      });
+
       const attestation = await getWebAuthnAttestation({
         publicKey: {
           rp: options.rp,
