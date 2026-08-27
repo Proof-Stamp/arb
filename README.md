@@ -100,11 +100,14 @@ The unit tests enforce this rule using the standard SHA-256 value for `abc` and 
 
 ## Current implementation
 
+The first web preview is deliberately user-facing. A tester can choose a file and press **Create ProofStamp**. The browser performs SHA-256 locally and hides the fingerprint under technical details. The preview then states clearly that it stops before the blockchain transaction.
+
 The bootstrap application currently includes:
 
 - local SHA-256 hashing with the browser Web Crypto API
 - known SHA-256 test vectors
 - a temporary 100 MB V0 browser-hashing limit
+- a normal-user file-selection flow with technical details secondary
 - pinned Arbitrum Sepolia and official EAS contract configuration
 - pinned, deterministic ProofStamp V1 schema identity
 - exact `bytes32 contentHash` encoding and decoding tests
@@ -163,8 +166,12 @@ The app is static-first and designed to deploy directly from this repository.
 
 - Build command: `npm run build`
 - Build output: `dist`
+- Production branch: `main`
+- Feature branches: Cloudflare Pages preview deployments
 - SPA fallback: `public/_redirects`
 - Baseline response headers: `public/_headers`
+
+See [docs/cloudflare-pages.md](docs/cloudflare-pages.md) for the browser-preview deployment setup and passkey-domain note.
 
 A Content Security Policy will be added once the exact ZeroDev and Arbitrum RPC connections are known. It should be restrictive enough to be useful rather than added prematurely and then weakened to make the app work.
 
@@ -172,7 +179,7 @@ A Content Security Policy will be added once the exact ZeroDev and Arbitrum RPC 
 
 ## Planned V0 milestones
 
-1. Local SHA-256 hashing
+1. Local SHA-256 hashing and browser preview
 2. Arbitrum Sepolia and EAS configuration
 3. Register one immutable ProofStamp EAS schema
 4. ZeroDev passkey account and constrained gas sponsorship
