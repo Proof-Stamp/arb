@@ -28,31 +28,85 @@ A ProofStamp is evidence that a specific hash was recorded at a particular block
 - **No crypto UX requirement:** normal users should not need seed phrases, gas, or token balances.
 - **Standard primitives:** prefer established protocols over custom cryptography or unnecessary smart contracts.
 
-## Planned stack
+## Stack
 
 - React + TypeScript + Vite
 - Cloudflare Pages
 - Arbitrum Sepolia
 - Ethereum Attestation Service (EAS)
-- ZeroDev for passkey-based smart accounts and sponsored transactions
+- Viem for typed EVM reads and ABI encoding
+- ZeroDev planned for passkey-based smart accounts and sponsored transactions
 
-The planned EAS V1 payload is deliberately small:
+## Arbitrum Sepolia + EAS configuration
+
+The V0 chain configuration is deliberately pinned in source code.
+
+| Item | Value |
+| --- | --- |
+| Chain | Arbitrum Sepolia |
+| Chain ID | `421614` |
+| EAS | `0x2521021fc8BF070473E1e1801D3c7B4aB701E1dE` |
+| SchemaRegistry | `0x45CB6Fa0870a8Af06796Ac15915619a0f22cd475` |
+
+The deployment values were verified against the official `ethereum-attestation-service/eas-contracts` repository at commit `e6e970286ff18bbdfc5d8eff2742c5ece46040e4`.
+
+The ProofStamp V1 EAS schema is intentionally minimal:
 
 ```text
 bytes32 contentHash
 ```
 
-The EAS attestation UID will be the canonical ProofStamp identifier. Transaction and block information will remain available for direct blockchain inspection.
+Schema properties:
+
+- resolver: zero address
+- revocable: `false`
+- schema UID: derived deterministically using the same packed encoding and Keccak-256 rule as the EAS SchemaRegistry contract
+
+The schema has not been registered by this repository yet. Registration is a separate, explicit step. Once registered with the values above, its UID is fixed and can be independently recomputed.
+
+## Hash encoding rule
+
+The browser-generated SHA-256 digest is already exactly 32 bytes. ProofStamp stores those exact bytes as `contentHash`.
+
+It must **not** be hashed again, converted with Keccak-256, or encoded as the UTF-8 text of the hexadecimal string.
+
+The unit tests enforce this rule using the standard SHA-256 value for `abc` and confirm that EAS encoding preserves the exact 32-byte digest.
 
 ## Current implementation
 
-The bootstrap application currently implements the first trust boundary: **local SHA-256 hashing**.
+The bootstrap application currently includes:
 
-- Hashing uses the browser Web Crypto API.
-- The file is not uploaded.
-- Known SHA-256 test vectors are included.
-- The V0 browser-hashing limit is 100 MB while memory behavior is kept intentionally simple.
-- Blockchain anchoring is not enabled yet.
+- local SHA-256 hashing with the browser Web Crypto API
+- known SHA-256 test vectors
+- a temporary 100 MB V0 browser-hashing limit
+- pinned Arbitrum Sepolia and official EAS contract configuration
+- deterministic ProofStamp schema definition
+- exact `bytes32 contentHash` encoding and decoding tests
+- direct Viem helpers for `EAS.getAttestation(uid)` and `SchemaRegistry.getSchema(uid)`
+
+Blockchain writes, passkeys, gas sponsorship, and receipt routes are not enabled yet.
+
+## Independent verification architecture
+
+The verification path is designed to read EAS directly rather than depend on an indexer or ProofStamp backend:
+
+```text
+file bytes
+   ↓
+local SHA-256
+   ↓
+contentHash
+   ↓
+Arbitrum Sepolia RPC
+   ↓
+EAS.getAttestation(uid)
+   ↓
+decode bytes32 contentHash
+   ↓
+compare
+```
+
+EAS explorers and blockchain explorers can be linked for convenience, but they are not intended to be the cryptographic verification dependency.
 
 ## Development
 
@@ -87,13 +141,13 @@ The app is static-first and designed to deploy directly from this repository.
 
 A Content Security Policy will be added once the exact ZeroDev and Arbitrum RPC connections are known. It should be restrictive enough to be useful rather than added prematurely and then weakened to make the app work.
 
-Do not put secrets in `VITE_*` variables. Vite embeds those values in browser JavaScript.
+`VITE_ARBITRUM_SEPOLIA_RPC_URL` is an optional public RPC override. Do not put secrets in `VITE_*` variables. Vite embeds those values in browser JavaScript.
 
 ## Planned V0 milestones
 
 1. Local SHA-256 hashing
 2. Arbitrum Sepolia and EAS configuration
-3. One immutable ProofStamp EAS schema
+3. Register one immutable ProofStamp EAS schema
 4. ZeroDev passkey account and constrained gas sponsorship
 5. Create an EAS attestation containing the file hash
 6. Receipt with EAS UID, transaction, block, network, and SHA-256

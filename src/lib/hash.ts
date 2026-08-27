@@ -1,4 +1,6 @@
-export type Sha256Hex = `0x${string}`;
+import type { Bytes32Hex } from './bytes32';
+
+export type Sha256Hex = Bytes32Hex;
 
 export const MAX_V0_FILE_BYTES = 100 * 1024 * 1024;
 
