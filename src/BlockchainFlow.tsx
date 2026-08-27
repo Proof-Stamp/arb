@@ -42,7 +42,7 @@ async function assertProofStampSchemaReady(): Promise<void> {
     schema.resolver.toLowerCase() !== PROOFSTAMP_SCHEMA_RESOLVER.toLowerCase() ||
     schema.revocable !== PROOFSTAMP_SCHEMA_REVOCABLE
   ) {
-    throw new Error('The ProofStamp testnet schema is not registered yet.');
+    throw new Error('The selected EAS Content Hash schema is not registered on Arbitrum Sepolia.');
   }
 }
 
@@ -113,7 +113,7 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
         attestation.uid.toLowerCase() !== uid.toLowerCase() ||
         attestation.schema.toLowerCase() !== PROOFSTAMP_SCHEMA_UID.toLowerCase() ||
         attestation.recipient.toLowerCase() !== zeroAddress.toLowerCase() ||
-        attestation.revocable ||
+        attestation.revocable !== PROOFSTAMP_SCHEMA_REVOCABLE ||
         recordedHash.toLowerCase() !== hash.toLowerCase()
       ) {
         throw new Error('The recorded attestation did not match the prepared ProofStamp.');
