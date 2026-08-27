@@ -209,15 +209,38 @@ h2 {
   font-weight: 700;
 }
 
+.primary.compact {
+  margin-top: 16px;
+}
+
 .primary:disabled {
   background: #b7b7b2;
   cursor: not-allowed;
 }
 
 .primary:focus-visible,
+.secondary:focus-visible,
+.blockchain-link:focus-visible,
 summary:focus-visible {
   outline: 3px solid #b8cdfa;
   outline-offset: 3px;
+}
+
+.secondary {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px 18px;
+  border: 1px solid #c9c9c3;
+  border-radius: 10px;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.secondary:disabled {
+  color: #888;
+  cursor: not-allowed;
 }
 
 .prepared {
@@ -257,6 +280,31 @@ summary:focus-visible {
   font-weight: 800;
 }
 
+.next-step {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #dde4da;
+}
+
+.next-step strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.next-step p {
+  margin-bottom: 0;
+  color: #596056;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.setup-note {
+  padding: 14px;
+  border: 1px solid #e0d8c5;
+  border-radius: 10px;
+  background: #fffaf0;
+}
+
 details {
   margin-top: 16px;
   padding-top: 14px;
@@ -280,16 +328,33 @@ summary {
 }
 
 .result span {
+  margin-top: 6px;
   color: #666;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
 }
 
+.result span:first-child {
+  margin-top: 0;
+}
+
 .result code {
   overflow-wrap: anywhere;
   font-size: 13px;
   line-height: 1.55;
+}
+
+.blockchain-link {
+  display: inline-flex;
+  margin-top: 18px;
+  padding: 10px 14px;
+  border: 1px solid #c9c9c3;
+  border-radius: 9px;
+  background: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .error {

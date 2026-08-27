@@ -20,9 +20,14 @@
     "node": ">=22.13.0"
   },
   "dependencies": {
+    "@tanstack/react-query": "5.102.7",
+    "@wagmi/core": "3.6.4",
+    "@zerodev/wallet-core": "0.0.4",
+    "@zerodev/wallet-react": "0.0.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "viem": "2.55.19"
+    "viem": "2.55.19",
+    "wagmi": "3.7.6"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
