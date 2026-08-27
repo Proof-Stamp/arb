@@ -11,9 +11,11 @@ import type { Sha256Hex } from '../hash';
 
 export const PROOFSTAMP_SCHEMA = 'bytes32 contentHash' as const;
 export const PROOFSTAMP_SCHEMA_RESOLVER = zeroAddress;
-export const PROOFSTAMP_SCHEMA_REVOCABLE = false as const;
+// V0 reuses the standard EAS Content Hash schema. A ProofStamp-specific
+// non-revocable schema can be introduced later without changing the file hash format.
+export const PROOFSTAMP_SCHEMA_REVOCABLE = true as const;
 export const PROOFSTAMP_SCHEMA_UID =
-  '0x5c5b8b295ff43c8e442be11d569e94a4cd5476f5e23df0f71bdd408df6b9649c' as const;
+  '0xdf4c41ea0f6263c72aa385580124f41f2898d3613e86c50519fc3cfd7ff13ad4' as const;
 
 const PROOFSTAMP_SCHEMA_PARAMETERS = [{ name: 'contentHash', type: 'bytes32' }] as const;
 
