@@ -1,24 +1,8 @@
-import { useLoginPasskey, useRegisterPasskey } from '@zerodev/wallet-react';
-import { useState } from 'react';
-import { parseEventLogs, zeroAddress, type Hex } from 'viem';
-import { useAccount, useSendTransaction } from 'wagmi';
+import { type ComponentType, useState } from 'react';
+import type { Hex } from 'viem';
 import { ARBITRUM_SEPOLIA_CHAIN_ID } from './config/arbitrum';
-import { createArbitrumSepoliaPublicClient, readEasAttestation, readProofStampSchema } from './lib/eas/client';
-import {
-  decodeProofStampData,
-  PROOFSTAMP_SCHEMA,
-  PROOFSTAMP_SCHEMA_RESOLVER,
-  PROOFSTAMP_SCHEMA_REVOCABLE,
-  PROOFSTAMP_SCHEMA_UID,
-} from './lib/eas/schema';
-import {
-  createProofStampAttestCalldata,
-  EAS_ATTESTED_EVENT_ABI,
-  EAS_CONTRACT_ADDRESS,
-  getArbiscanTransactionUrl,
-} from './lib/eas/write';
+import { getArbiscanTransactionUrl } from './lib/eas/write';
 import { MAX_V0_FILE_BYTES, sha256Blob, type Sha256Hex } from './lib/hash';
-import { ARBITRUM_SEPOLIA_RPC_URL, IS_ZERODEV_CONFIGURED } from './wagmi';
 
 interface ProofResult {
   uid: `0x${string}`;
@@ -27,23 +11,21 @@ interface ProofResult {
   recordedAt: string;
 }
 
+interface BlockchainFlowProps {
+  hash: Sha256Hex;
+  onProof: (proof: ProofResult) => void;
+  onError: (message: string) => void;
+}
+
+type BlockchainFlowComponent = ComponentType<BlockchainFlowProps>;
+
+const IS_ZERODEV_CONFIGURED =
+  (import.meta.env.VITE_ZERODEV_PROJECT_ID?.trim() ?? '').length > 0;
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-async function assertProofStampSchemaReady(): Promise<void> {
-  const schema = await readProofStampSchema(ARBITRUM_SEPOLIA_RPC_URL);
-
-  if (
-    schema.uid.toLowerCase() !== PROOFSTAMP_SCHEMA_UID.toLowerCase() ||
-    schema.schema !== PROOFSTAMP_SCHEMA ||
-    schema.resolver.toLowerCase() !== PROOFSTAMP_SCHEMA_RESOLVER.toLowerCase() ||
-    schema.revocable !== PROOFSTAMP_SCHEMA_REVOCABLE
-  ) {
-    throw new Error('The ProofStamp testnet schema is not registered yet.');
-  }
 }
 
 export default function App() {
@@ -52,14 +34,8 @@ export default function App() {
   const [proof, setProof] = useState<ProofResult | null>(null);
   const [error, setError] = useState<string>('');
   const [isPreparing, setIsPreparing] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-
-  const { address, isConnected } = useAccount();
-  const registerPasskey = useRegisterPasskey();
-  const loginPasskey = useLoginPasskey();
-  const sendTransaction = useSendTransaction();
-
-  const isAuthenticating = registerPasskey.isPending || loginPasskey.isPending;
+  const [isLoadingBlockchain, setIsLoadingBlockchain] = useState(false);
+  const [BlockchainFlow, setBlockchainFlow] = useState<BlockchainFlowComponent | null>(null);
 
   async function handlePrepare(): Promise<void> {
     if (!file) return;
@@ -67,6 +43,7 @@ export default function App() {
     setError('');
     setHash(null);
     setProof(null);
+    setBlockchainFlow(null);
     setIsPreparing(true);
 
     try {
@@ -78,81 +55,21 @@ export default function App() {
     }
   }
 
-  async function handlePasskey(mode: 'register' | 'login'): Promise<void> {
+  async function handleLoadBlockchain(): Promise<void> {
     setError('');
+    setIsLoadingBlockchain(true);
 
     try {
-      if (mode === 'register') {
-        await registerPasskey.mutateAsync();
-      } else {
-        await loginPasskey.mutateAsync();
-      }
+      const module = await import('./BlockchainFlow');
+      setBlockchainFlow(() => module.BlockchainFlow);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to continue with this passkey.');
-    }
-  }
-
-  async function handleRecord(): Promise<void> {
-    if (!hash || !isConnected) return;
-
-    setError('');
-    setProof(null);
-    setIsRecording(true);
-
-    try {
-      await assertProofStampSchemaReady();
-
-      const transactionHash = await sendTransaction.sendTransactionAsync({
-        chainId: ARBITRUM_SEPOLIA_CHAIN_ID,
-        to: EAS_CONTRACT_ADDRESS,
-        data: createProofStampAttestCalldata(hash),
-        value: 0n,
-      });
-
-      const publicClient = createArbitrumSepoliaPublicClient(ARBITRUM_SEPOLIA_RPC_URL);
-      const receipt = await publicClient.waitForTransactionReceipt({ hash: transactionHash });
-
-      if (receipt.status !== 'success') {
-        throw new Error('The blockchain transaction did not complete successfully.');
-      }
-
-      const events = parseEventLogs({
-        abi: EAS_ATTESTED_EVENT_ABI,
-        eventName: 'Attested',
-        logs: receipt.logs,
-      });
-      const event = events.find(
-        (candidate) => candidate.address.toLowerCase() === EAS_CONTRACT_ADDRESS.toLowerCase(),
+      setError(
+        caught instanceof Error
+          ? `Unable to load the blockchain connection: ${caught.message}`
+          : 'Unable to load the blockchain connection.',
       );
-      const uid = event?.args.uid;
-
-      if (!uid) {
-        throw new Error('The ProofStamp transaction completed, but its proof ID was not found.');
-      }
-
-      const attestation = await readEasAttestation(uid, ARBITRUM_SEPOLIA_RPC_URL);
-      const recordedHash = decodeProofStampData(attestation.data);
-
-      if (
-        attestation.uid.toLowerCase() !== uid.toLowerCase() ||
-        attestation.schema.toLowerCase() !== PROOFSTAMP_SCHEMA_UID.toLowerCase() ||
-        attestation.recipient.toLowerCase() !== zeroAddress.toLowerCase() ||
-        attestation.revocable ||
-        recordedHash.toLowerCase() !== hash.toLowerCase()
-      ) {
-        throw new Error('The recorded attestation did not match the prepared ProofStamp.');
-      }
-
-      setProof({
-        uid,
-        transactionHash,
-        blockNumber: receipt.blockNumber,
-        recordedAt: new Date(Number(attestation.time) * 1000).toLocaleString(),
-      });
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to create this ProofStamp.');
     } finally {
-      setIsRecording(false);
+      setIsLoadingBlockchain(false);
     }
   }
 
@@ -160,6 +77,7 @@ export default function App() {
     setFile(nextFile);
     setHash(null);
     setProof(null);
+    setBlockchainFlow(null);
     setError('');
   }
 
@@ -237,43 +155,21 @@ export default function App() {
                 <strong>Blockchain connection is not configured yet</strong>
                 <p>This test build needs a ZeroDev project ID before passkey testing can begin.</p>
               </div>
-            ) : !isConnected ? (
+            ) : BlockchainFlow ? (
+              <BlockchainFlow hash={hash} onProof={setProof} onError={setError} />
+            ) : (
               <div className="next-step">
                 <strong>Continue securely</strong>
                 <p>
-                  Your device will use a passkey. No seed phrase, token balance, or gas payment is
-                  required.
+                  Load the passkey connection only when you are ready. The file remains on this device.
                 </p>
                 <button
                   className="primary compact"
                   type="button"
-                  disabled={isAuthenticating}
-                  onClick={() => void handlePasskey('register')}
+                  disabled={isLoadingBlockchain}
+                  onClick={() => void handleLoadBlockchain()}
                 >
-                  {registerPasskey.isPending ? 'Creating passkey…' : 'Create a passkey'}
-                </button>
-                <button
-                  className="secondary"
-                  type="button"
-                  disabled={isAuthenticating}
-                  onClick={() => void handlePasskey('login')}
-                >
-                  {loginPasskey.isPending ? 'Using passkey…' : 'I already have a passkey'}
-                </button>
-              </div>
-            ) : (
-              <div className="next-step">
-                <strong>Ready to record</strong>
-                <p>Only the SHA-256 fingerprint will be placed in the public attestation.</p>
-                <button
-                  className="primary compact"
-                  type="button"
-                  disabled={isRecording || sendTransaction.isPending}
-                  onClick={() => void handleRecord()}
-                >
-                  {isRecording || sendTransaction.isPending
-                    ? 'Creating ProofStamp…'
-                    : 'Create ProofStamp'}
+                  {isLoadingBlockchain ? 'Loading secure connection…' : 'Continue with passkey'}
                 </button>
               </div>
             )}
@@ -283,12 +179,6 @@ export default function App() {
               <div className="result">
                 <span>SHA-256 / file fingerprint</span>
                 <code>{hash}</code>
-                {address ? (
-                  <>
-                    <span>Attester address</span>
-                    <code>{address}</code>
-                  </>
-                ) : null}
               </div>
             </details>
           </div>
