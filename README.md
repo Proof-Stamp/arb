@@ -2,6 +2,8 @@
 
 Create independently verifiable evidence for a file without uploading the file itself.
 
+**Testnet preview:** https://arb-1gv.pages.dev/
+
 > **Status:** Arbitrum Sepolia testnet preview. Experimental software, not a production service.
 
 ## How it works
@@ -85,6 +87,7 @@ Cloudflare deployment notes are in [docs/cloudflare-pages.md](docs/cloudflare-pa
 - [Disclaimer](DISCLAIMER.md)
 - [Contributing](CONTRIBUTING.md)
 - [MIT License](LICENSE)
+- [ProofStamp name and branding](TRADEMARKS.md)
 
 ## Scope
 
