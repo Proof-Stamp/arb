@@ -37,6 +37,13 @@ type CopyStatus = 'idle' | 'copied';
 const IS_ZERODEV_CONFIGURED =
   (import.meta.env.VITE_ZERODEV_PROJECT_ID?.trim() ?? '').length > 0;
 
+const BUILD_COMMIT_SHA = __BUILD_COMMIT_SHA__.trim();
+const BUILD_REFERENCE = BUILD_COMMIT_SHA === 'local' ? 'local' : BUILD_COMMIT_SHA.slice(0, 8);
+const BUILD_COMMIT_URL =
+  BUILD_COMMIT_SHA === 'local'
+    ? 'https://github.com/Proof-Stamp/arb'
+    : `https://github.com/Proof-Stamp/arb/commit/${BUILD_COMMIT_SHA}`;
+
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -550,12 +557,8 @@ export default function App() {
         <p>
           A ProofStamp can show that specific bytes were recorded at a time. It does not prove that
           the content itself is true or authentic. · Build reference:{' '}
-          <a
-            href="https://github.com/Proof-Stamp/arb/commit/fe5f0713a05e2975ac6916cdbd18e58101753ec1"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <code>fe5f0713</code>
+          <a href={BUILD_COMMIT_URL} target="_blank" rel="noreferrer">
+            <code>{BUILD_REFERENCE}</code>
           </a>
         </p>
       </footer>
