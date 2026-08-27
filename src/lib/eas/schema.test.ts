@@ -13,12 +13,12 @@ import {
 const ABC_SHA256 = '0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad' as const;
 
 describe('ProofStamp EAS schema', () => {
-  it('pins the minimal immutable V1 schema identity', () => {
+  it('pins the standard revocable EAS Content Hash schema for V0', () => {
     expect(PROOFSTAMP_SCHEMA).toBe('bytes32 contentHash');
     expect(PROOFSTAMP_SCHEMA_RESOLVER).toBe(zeroAddress);
-    expect(PROOFSTAMP_SCHEMA_REVOCABLE).toBe(false);
+    expect(PROOFSTAMP_SCHEMA_REVOCABLE).toBe(true);
     expect(PROOFSTAMP_SCHEMA_UID).toBe(
-      '0x5c5b8b295ff43c8e442be11d569e94a4cd5476f5e23df0f71bdd408df6b9649c',
+      '0xdf4c41ea0f6263c72aa385580124f41f2898d3613e86c50519fc3cfd7ff13ad4',
     );
     expect(computeProofStampSchemaUid()).toBe(PROOFSTAMP_SCHEMA_UID);
   });
