@@ -600,9 +600,32 @@ export default function App() {
       </section>
 
       <footer>
-        <p>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap',
+            paddingTop: '18px',
+            borderTop: '1px solid rgba(7, 27, 44, 0.12)',
+          }}
+        >
+          <span>ProofStamp via Arbitrum</span>
+          <nav
+            aria-label="Project links"
+            style={{ display: 'flex', flexWrap: 'wrap', gap: '16px' }}
+          >
+            <a href="https://arbitrum.io/" target="_blank" rel="noreferrer">Arbitrum</a>
+            <a href="https://attest.org/" target="_blank" rel="noreferrer">EAS</a>
+            <a href="https://www.zerodev.app/" target="_blank" rel="noreferrer">ZeroDev</a>
+            <a href="https://github.com/Proof-Stamp/arb" target="_blank" rel="noreferrer">GitHub</a>
+            <a href="https://proofstamp.org/" target="_blank" rel="noreferrer">ProofStamp.org</a>
+          </nav>
+        </div>
+        <p style={{ marginTop: '14px' }}>
           A ProofStamp can show that specific bytes were recorded at a time. It does not prove that
-          the content itself is true or authentic. · Build reference:{' '}
+          the content itself is true or authentic. · Testnet preview · Build reference:{' '}
           <a href={BUILD_COMMIT_URL} target="_blank" rel="noreferrer">
             <code>{BUILD_REFERENCE}</code>
           </a>
