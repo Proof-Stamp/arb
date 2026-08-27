@@ -5,6 +5,7 @@ import {
   PROOFSTAMP_SCHEMA_RESOLVER,
   PROOFSTAMP_SCHEMA_REVOCABLE,
   PROOFSTAMP_SCHEMA_UID,
+  computeProofStampSchemaUid,
   decodeProofStampData,
   encodeProofStampData,
 } from './schema';
@@ -12,11 +13,14 @@ import {
 const ABC_SHA256 = '0xba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad' as const;
 
 describe('ProofStamp EAS schema', () => {
-  it('uses the minimal immutable V1 schema', () => {
+  it('pins the minimal immutable V1 schema identity', () => {
     expect(PROOFSTAMP_SCHEMA).toBe('bytes32 contentHash');
     expect(PROOFSTAMP_SCHEMA_RESOLVER).toBe(zeroAddress);
     expect(PROOFSTAMP_SCHEMA_REVOCABLE).toBe(false);
-    expect(PROOFSTAMP_SCHEMA_UID).toMatch(/^0x[0-9a-f]{64}$/);
+    expect(PROOFSTAMP_SCHEMA_UID).toBe(
+      '0x5c5b8b295ff43c8e442be11d569e94a4cd5476f5e23df0f71bdd408df6b9649c',
+    );
+    expect(computeProofStampSchemaUid()).toBe(PROOFSTAMP_SCHEMA_UID);
   });
 
   it('encodes the exact SHA-256 bytes as a single bytes32 value', () => {

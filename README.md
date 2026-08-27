@@ -60,9 +60,11 @@ Schema properties:
 
 - resolver: zero address
 - revocable: `false`
-- schema UID: derived deterministically using the same packed encoding and Keccak-256 rule as the EAS SchemaRegistry contract
+- expected schema UID: `0x5c5b8b295ff43c8e442be11d569e94a4cd5476f5e23df0f71bdd408df6b9649c`
 
-The schema has not been registered by this repository yet. Registration is a separate, explicit step. Once registered with the values above, its UID is fixed and can be independently recomputed.
+The schema UID is derived deterministically using the same packed encoding and Keccak-256 rule as the EAS SchemaRegistry contract. The expected UID is pinned in source and the test suite independently recomputes it from the schema definition, resolver, and revocability flag.
+
+The schema has not been registered by this repository yet. Registration is a separate, explicit step. Once registered with the values above, the returned UID must match the pinned value before we proceed.
 
 ## Hash encoding rule
 
@@ -80,7 +82,7 @@ The bootstrap application currently includes:
 - known SHA-256 test vectors
 - a temporary 100 MB V0 browser-hashing limit
 - pinned Arbitrum Sepolia and official EAS contract configuration
-- deterministic ProofStamp schema definition
+- pinned, deterministic ProofStamp V1 schema identity
 - exact `bytes32 contentHash` encoding and decoding tests
 - direct Viem helpers for `EAS.getAttestation(uid)` and `SchemaRegistry.getSchema(uid)`
 

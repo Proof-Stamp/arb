@@ -12,15 +12,19 @@ import type { Sha256Hex } from '../hash';
 export const PROOFSTAMP_SCHEMA = 'bytes32 contentHash' as const;
 export const PROOFSTAMP_SCHEMA_RESOLVER = zeroAddress;
 export const PROOFSTAMP_SCHEMA_REVOCABLE = false as const;
+export const PROOFSTAMP_SCHEMA_UID =
+  '0x5c5b8b295ff43c8e442be11d569e94a4cd5476f5e23df0f71bdd408df6b9649c' as const;
 
 const PROOFSTAMP_SCHEMA_PARAMETERS = [{ name: 'contentHash', type: 'bytes32' }] as const;
 
-export const PROOFSTAMP_SCHEMA_UID = keccak256(
-  encodePacked(
-    ['string', 'address', 'bool'],
-    [PROOFSTAMP_SCHEMA, PROOFSTAMP_SCHEMA_RESOLVER, PROOFSTAMP_SCHEMA_REVOCABLE],
-  ),
-);
+export function computeProofStampSchemaUid(): Hex {
+  return keccak256(
+    encodePacked(
+      ['string', 'address', 'bool'],
+      [PROOFSTAMP_SCHEMA, PROOFSTAMP_SCHEMA_RESOLVER, PROOFSTAMP_SCHEMA_REVOCABLE],
+    ),
+  );
+}
 
 export function encodeProofStampData(contentHash: Sha256Hex): Hex {
   assertBytes32Hex(contentHash, 'SHA-256 content hash');
