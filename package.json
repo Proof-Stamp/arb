@@ -24,6 +24,8 @@
     "@wagmi/core": "3.6.4",
     "@zerodev/wallet-core": "0.0.4",
     "@zerodev/wallet-react": "0.0.6",
+    "events": "3.3.0",
+    "json-canonicalize": "2.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "viem": "2.55.19",
