@@ -51,6 +51,13 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function proofStampReceiptFilename(originalName: string): string {
+  const safeName = originalName.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_').trim() || 'file';
+  const lastDot = safeName.lastIndexOf('.');
+  const baseName = lastDot > 0 ? safeName.slice(0, lastDot) : safeName;
+  return `${baseName}_proofstamp.txt`;
+}
+
 function isBytes32(value: string): value is `0x${string}` {
   return /^0x[0-9a-fA-F]{64}$/.test(value);
 }
@@ -224,8 +231,7 @@ export default function App() {
 
     setError('');
     setTechnicalError('');
-    const safeFileName = file.name.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_').trim() || 'file';
-    downloadText(receiptToText(proof, hash), `${safeFileName}_proofstamp.txt`);
+    downloadText(receiptToText(proof, hash), proofStampReceiptFilename(file.name));
   }
 
   function handleCheckFileChange(nextFile: File | null): void {
