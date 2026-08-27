@@ -14,7 +14,11 @@ export async function sha256ArrayBuffer(data: ArrayBuffer): Promise<Sha256Hex> {
   return bytesToHex(new Uint8Array(digest));
 }
 
-export async function sha256Blob(blob: Blob): Promise<Sha256Hex> {
+export async function sha256Blob(blob: Blob | null): Promise<Sha256Hex> {
+  if (!blob) {
+    throw new Error('No file is selected.');
+  }
+
   if (blob.size > MAX_V0_FILE_BYTES) {
     throw new Error('This V0 prototype supports files up to 100 MB.');
   }

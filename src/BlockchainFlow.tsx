@@ -30,11 +30,53 @@ export interface BlockchainProofResult {
 interface BlockchainFlowProps {
   hash: Sha256Hex;
   onProof: (proof: BlockchainProofResult) => void;
-  onError: (message: string) => void;
+  onError: (message: string, technicalDetails?: string) => void;
 }
 
-function shortAddress(address: string): string {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
+function describePasskeyError(
+  caught: unknown,
+  mode: 'register' | 'login',
+): { message: string; technicalDetails: string } {
+  const technicalDetails = caught instanceof Error ? caught.message : String(caught);
+  const normalized = technicalDetails.toLowerCase();
+
+  if (
+    normalized.includes('notallowederror') ||
+    normalized.includes('cancelled') ||
+    normalized.includes('canceled') ||
+    normalized.includes('timed out')
+  ) {
+    return {
+      message: 'Passkey request was cancelled or timed out. Try again when you are ready.',
+      technicalDetails,
+    };
+  }
+
+  if (mode === 'login' && (normalized.includes('user not found') || normalized.includes('not_found'))) {
+    return {
+      message: 'This passkey is not registered for this app. Try another passkey or create a new one.',
+      technicalDetails,
+    };
+  }
+
+  if (
+    normalized.includes('external_service_error') ||
+    normalized.includes('failed to register with passkey') ||
+    normalized.includes('request failed (500)')
+  ) {
+    return {
+      message: 'Passkey setup could not be completed by the wallet service. Try another passkey or try again.',
+      technicalDetails,
+    };
+  }
+
+  return {
+    message:
+      mode === 'register'
+        ? 'Passkey setup could not be completed. Try again or use another passkey.'
+        : 'This passkey could not be used. Try another passkey or try again.',
+    technicalDetails,
+  };
 }
 
 async function assertProofStampSchemaReady(): Promise<void> {
@@ -70,7 +112,8 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
         await loginPasskey.mutateAsync();
       }
     } catch (caught) {
-      onError(caught instanceof Error ? caught.message : 'Unable to continue with this passkey.');
+      const described = describePasskeyError(caught, mode);
+      onError(described.message, described.technicalDetails);
     }
   }
 
@@ -170,17 +213,14 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
       ) : (
         <div className="next-step">
           <strong>Ready to record</strong>
-          <p>
-            Passkey session active{address ? ` · ${shortAddress(address)}` : ''}. Only the SHA-256
-            fingerprint will be placed in the public attestation.
-          </p>
+          <p>Passkey ready. Only the SHA-256 fingerprint will be recorded publicly on Arbitrum.</p>
           <button
             className="primary compact"
             type="button"
             disabled={isRecording || sendTransaction.isPending}
             onClick={() => void handleRecord()}
           >
-            {isRecording || sendTransaction.isPending ? 'Creating ProofStamp…' : 'Create ProofStamp'}
+            {isRecording || sendTransaction.isPending ? 'Recording on Arbitrum…' : 'Record on Arbitrum'}
           </button>
           <button
             className="secondary"
@@ -188,7 +228,7 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
             disabled={isRecording || sendTransaction.isPending || disconnect.isPending}
             onClick={handleDisconnect}
           >
-            {disconnect.isPending ? 'Disconnecting…' : 'Use another passkey'}
+            {disconnect.isPending ? 'Signing out…' : 'Sign out'}
           </button>
         </div>
       )}

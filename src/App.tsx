@@ -1,4 +1,4 @@
-import { type ComponentType, useState } from 'react';
+import { type ComponentType, useEffect, useState } from 'react';
 import { zeroAddress, type Hex } from 'viem';
 import { ARBITRUM_SEPOLIA_CHAIN_ID } from './config/arbitrum';
 import { readEasAttestation } from './lib/eas/client';
@@ -17,7 +17,7 @@ interface ProofResult {
 interface BlockchainFlowProps {
   hash: Sha256Hex;
   onProof: (proof: ProofResult) => void;
-  onError: (message: string) => void;
+  onError: (message: string, technicalDetails?: string) => void;
 }
 
 interface CheckResult {
@@ -126,6 +126,7 @@ export default function App() {
   const [hash, setHash] = useState<Sha256Hex | null>(null);
   const [proof, setProof] = useState<ProofResult | null>(null);
   const [error, setError] = useState<string>('');
+  const [technicalError, setTechnicalError] = useState<string>('');
   const [isPreparing, setIsPreparing] = useState(false);
   const [isLoadingBlockchain, setIsLoadingBlockchain] = useState(false);
   const [BlockchainFlow, setBlockchainFlow] = useState<BlockchainFlowComponent | null>(null);
@@ -138,42 +139,56 @@ export default function App() {
   const [isChecking, setIsChecking] = useState(false);
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
 
-  async function handlePrepare(): Promise<void> {
-    if (!file) return;
-
-    setError('');
-    setHash(null);
-    setProof(null);
-    setCopyStatus('idle');
-    setBlockchainFlow(null);
-    setIsPreparing(true);
-
-    try {
-      setHash(await sha256Blob(file));
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to prepare this file.');
-    } finally {
+  useEffect(() => {
+    if (!file) {
       setIsPreparing(false);
-    }
-  }
-
-  async function handleLoadBlockchain(): Promise<void> {
-    setError('');
-    setIsLoadingBlockchain(true);
-
-    try {
-      const module = await import('./BlockchainFlow');
-      setBlockchainFlow(() => module.BlockchainFlow);
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? `Unable to load the blockchain connection: ${caught.message}`
-          : 'Unable to load the blockchain connection.',
-      );
-    } finally {
       setIsLoadingBlockchain(false);
+      return;
     }
-  }
+
+    let cancelled = false;
+
+    async function prepareSelectedFile(): Promise<void> {
+      setIsPreparing(true);
+      setIsLoadingBlockchain(false);
+
+      try {
+        const preparedHash = await sha256Blob(file);
+        if (cancelled) return;
+
+        setHash(preparedHash);
+        setIsPreparing(false);
+
+        if (!IS_ZERODEV_CONFIGURED) return;
+
+        setIsLoadingBlockchain(true);
+        try {
+          const module = await import('./BlockchainFlow');
+          if (!cancelled) setBlockchainFlow(() => module.BlockchainFlow);
+        } catch (caught) {
+          if (!cancelled) {
+            setError('Passkey options could not be loaded. Reload the page and try again.');
+            setTechnicalError(caught instanceof Error ? caught.message : String(caught));
+          }
+        } finally {
+          if (!cancelled) setIsLoadingBlockchain(false);
+        }
+      } catch (caught) {
+        if (!cancelled) {
+          setError(caught instanceof Error ? caught.message : 'Unable to prepare this file.');
+          setTechnicalError('');
+        }
+      } finally {
+        if (!cancelled) setIsPreparing(false);
+      }
+    }
+
+    void prepareSelectedFile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [file]);
 
   function handleFileChange(nextFile: File | null): void {
     setFile(nextFile);
@@ -182,12 +197,19 @@ export default function App() {
     setCopyStatus('idle');
     setBlockchainFlow(null);
     setError('');
+    setTechnicalError('');
+  }
+
+  function handleBlockchainError(message: string, technicalDetails = ''): void {
+    setError(message);
+    setTechnicalError(technicalDetails);
   }
 
   async function handleCopyProofStamp(): Promise<void> {
     if (!proof || !hash) return;
 
     setError('');
+    setTechnicalError('');
     try {
       await copyText(receiptToText(proof, hash));
       setCopyStatus('copied');
@@ -201,6 +223,7 @@ export default function App() {
     if (!proof || !hash || !file) return;
 
     setError('');
+    setTechnicalError('');
     const safeFileName = file.name.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_').trim() || 'file';
     downloadText(receiptToText(proof, hash), `${safeFileName}_proofstamp.txt`);
   }
@@ -225,14 +248,22 @@ export default function App() {
 
     try {
       const receiptText = await receiptFile.text();
-      if (!extractProofId(receiptText)) {
+      const proofId = extractProofId(receiptText);
+      if (!proofId) {
         throw new Error('This file does not contain a valid ProofStamp Proof ID.');
       }
-      setCheckProofId(receiptText);
+      setCheckProofId(proofId);
       setCheckReceiptName(receiptFile.name);
     } catch (caught) {
       setCheckError(caught instanceof Error ? caught.message : 'Unable to read this ProofStamp file.');
     }
+  }
+
+  function handlePasteProofIdInstead(): void {
+    setCheckReceiptName('');
+    setCheckProofId('');
+    setCheckResult(null);
+    setCheckError('');
   }
 
   async function handleCheck(): Promise<void> {
@@ -379,15 +410,16 @@ export default function App() {
                 </div>
               ) : null}
 
-              {!hash ? (
-                <button
-                  className="primary"
-                  type="button"
-                  onClick={handlePrepare}
-                  disabled={!file || isPreparing}
-                >
-                  {isPreparing ? 'Preparing ProofStamp…' : 'Prepare ProofStamp'}
-                </button>
+              {file && isPreparing && !hash ? (
+                <div className="prepared" aria-live="polite">
+                  <div className="prepared-heading">
+                    <span className="status-mark" aria-hidden="true">…</span>
+                    <div>
+                      <strong>Preparing file locally…</strong>
+                      <p>Calculating its SHA-256 fingerprint on this device.</p>
+                    </div>
+                  </div>
+                </div>
               ) : null}
 
               {hash && !proof ? (
@@ -406,19 +438,16 @@ export default function App() {
                       <p>This test build needs a ZeroDev project ID before passkey testing can begin.</p>
                     </div>
                   ) : BlockchainFlow ? (
-                    <BlockchainFlow hash={hash} onProof={setProof} onError={setError} />
-                  ) : (
+                    <BlockchainFlow hash={hash} onProof={setProof} onError={handleBlockchainError} />
+                  ) : isLoadingBlockchain ? (
                     <div className="next-step">
-                      <strong>Continue securely</strong>
-                      <p>Load the passkey connection only when you are ready. The file remains on this device.</p>
-                      <button
-                        className="primary compact"
-                        type="button"
-                        disabled={isLoadingBlockchain}
-                        onClick={() => void handleLoadBlockchain()}
-                      >
-                        {isLoadingBlockchain ? 'Loading secure connection…' : 'Continue with passkey'}
-                      </button>
+                      <strong>Loading passkey options…</strong>
+                      <p>Your file is ready. The secure connection is loading now.</p>
+                    </div>
+                  ) : (
+                    <div className="next-step setup-note">
+                      <strong>Passkey connection is unavailable</strong>
+                      <p>Reload the page and try again.</p>
                     </div>
                   )}
 
@@ -489,7 +518,20 @@ export default function App() {
                 </div>
               ) : null}
 
-              {error ? <p className="error" role="alert">{error}</p> : null}
+              {error ? (
+                <>
+                  <p className="error" role="alert">{error}</p>
+                  {technicalError ? (
+                    <details>
+                      <summary>Technical details</summary>
+                      <div className="result">
+                        <span>Error details</span>
+                        <code>{technicalError}</code>
+                      </div>
+                    </details>
+                  ) : null}
+                </>
+              ) : null}
             </section>
           ) : (
             <section id="check-panel" className="panel" role="tabpanel">
@@ -530,26 +572,34 @@ export default function App() {
               </label>
 
               {checkReceiptName ? (
-                <div className="file-summary" aria-live="polite">
-                  <strong>{checkReceiptName}</strong>
-                  <span>Receipt ready</span>
-                </div>
-              ) : null}
-
-              <label className="field">
-                <span>Or paste ProofStamp / Proof ID</span>
-                <textarea
-                  rows={5}
-                  value={checkProofId}
-                  onChange={(event) => {
-                    setCheckProofId(event.target.value);
-                    setCheckReceiptName('');
-                    setCheckResult(null);
-                    setCheckError('');
-                  }}
-                  placeholder="Paste the saved ProofStamp receipt or 0x…"
-                />
-              </label>
+                <>
+                  <div className="file-summary" aria-live="polite">
+                    <strong>{checkReceiptName}</strong>
+                    <span>Receipt ready</span>
+                  </div>
+                  <button
+                    className="secondary"
+                    type="button"
+                    onClick={handlePasteProofIdInstead}
+                  >
+                    Paste Proof ID instead
+                  </button>
+                </>
+              ) : (
+                <label className="field">
+                  <span>Or paste ProofStamp / Proof ID</span>
+                  <textarea
+                    rows={5}
+                    value={checkProofId}
+                    onChange={(event) => {
+                      setCheckProofId(event.target.value);
+                      setCheckResult(null);
+                      setCheckError('');
+                    }}
+                    placeholder="Paste the saved ProofStamp receipt or 0x…"
+                  />
+                </label>
+              )}
 
               <button
                 className="primary"
