@@ -196,10 +196,11 @@ export default function App() {
   }
 
   function handleDownloadProofStamp(): void {
-    if (!proof || !hash) return;
+    if (!proof || !hash || !file) return;
 
     setError('');
-    downloadText(receiptToText(proof, hash), `proofstamp-${proof.uid.slice(2, 14)}.txt`);
+    const safeFileName = file.name.replace(/[<>:"/\\|?*\u0000-\u001F]/g, '_').trim() || 'file';
+    downloadText(receiptToText(proof, hash), `${safeFileName}_proofstamp.txt`);
   }
 
   function handleCheckFileChange(nextFile: File | null): void {
