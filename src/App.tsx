@@ -49,7 +49,7 @@ export default function App() {
 
       <section className="hero" aria-labelledby="page-title">
         <p className="eyebrow">Private file. Public proof.</p>
-        <h1 id="page-title">Proof a file without uploading it.</h1>
+        <h1 id="page-title">Create proof for a file without uploading it.</h1>
         <p className="lede">
           Choose a file. ProofStamp prepares its cryptographic fingerprint in your browser. Your file
           stays on this device.
