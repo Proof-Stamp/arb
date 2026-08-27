@@ -5,6 +5,7 @@ import { readEasAttestation } from './lib/eas/client';
 import { decodeProofStampData, PROOFSTAMP_SCHEMA_UID } from './lib/eas/schema';
 import { getArbiscanTransactionUrl } from './lib/eas/write';
 import { MAX_V0_FILE_BYTES, sha256Blob, type Sha256Hex } from './lib/hash';
+import './receipt-actions.css';
 
 interface ProofResult {
   uid: `0x${string}`;
@@ -31,6 +32,7 @@ interface CheckResult {
 
 type BlockchainFlowComponent = ComponentType<BlockchainFlowProps>;
 type ToolTab = 'create' | 'check';
+type CopyStatus = 'idle' | 'copied';
 
 const IS_ZERODEV_CONFIGURED =
   (import.meta.env.VITE_ZERODEV_PROJECT_ID?.trim() ?? '').length > 0;
@@ -45,6 +47,70 @@ function isBytes32(value: string): value is `0x${string}` {
   return /^0x[0-9a-fA-F]{64}$/.test(value);
 }
 
+function extractProofId(value: string): `0x${string}` | null {
+  const trimmed = value.trim();
+  if (isBytes32(trimmed)) return trimmed;
+
+  const labelled = trimmed.match(
+    /(?:Proof ID\s*\/\s*EAS UID|EAS UID|Proof ID)\s*:\s*(0x[0-9a-fA-F]{64})/i,
+  )?.[1];
+
+  return labelled && isBytes32(labelled) ? labelled : null;
+}
+
+function receiptToText(proof: ProofResult, hash: Sha256Hex): string {
+  return [
+    'ProofStamp via Arbitrum',
+    'Testnet receipt',
+    '',
+    `Proof ID / EAS UID: ${proof.uid}`,
+    `SHA-256 / file fingerprint: ${hash}`,
+    `Recorded at: ${proof.recordedAt}`,
+    'Network: Arbitrum Sepolia',
+    `Chain ID: ${ARBITRUM_SEPOLIA_CHAIN_ID}`,
+    `Block: ${proof.blockNumber.toString()}`,
+    `Transaction: ${proof.transactionHash}`,
+    `EAS schema: ${PROOFSTAMP_SCHEMA_UID}`,
+    `Explorer: ${getArbiscanTransactionUrl(proof.transactionHash)}`,
+    '',
+    'Check this ProofStamp:',
+    'Open the ProofStamp via Arbitrum app, choose the exact original file, open Check, and paste this receipt.',
+    '',
+    'The file was not uploaded. Only its SHA-256 fingerprint was recorded publicly.',
+    'A ProofStamp can show that specific bytes were recorded at a time. It does not prove that the content itself is true or authentic.',
+  ].join('\n');
+}
+
+async function copyText(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  document.body.append(textarea);
+  textarea.select();
+  const copied = document.execCommand('copy');
+  textarea.remove();
+
+  if (!copied) throw new Error('Copy is not available in this browser.');
+}
+
+function downloadText(text: string, filename: string): void {
+  const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<ToolTab>('create');
 
@@ -55,6 +121,7 @@ export default function App() {
   const [isPreparing, setIsPreparing] = useState(false);
   const [isLoadingBlockchain, setIsLoadingBlockchain] = useState(false);
   const [BlockchainFlow, setBlockchainFlow] = useState<BlockchainFlowComponent | null>(null);
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>('idle');
 
   const [checkFile, setCheckFile] = useState<File | null>(null);
   const [checkProofId, setCheckProofId] = useState('');
@@ -68,6 +135,7 @@ export default function App() {
     setError('');
     setHash(null);
     setProof(null);
+    setCopyStatus('idle');
     setBlockchainFlow(null);
     setIsPreparing(true);
 
@@ -102,8 +170,29 @@ export default function App() {
     setFile(nextFile);
     setHash(null);
     setProof(null);
+    setCopyStatus('idle');
     setBlockchainFlow(null);
     setError('');
+  }
+
+  async function handleCopyProofStamp(): Promise<void> {
+    if (!proof || !hash) return;
+
+    setError('');
+    try {
+      await copyText(receiptToText(proof, hash));
+      setCopyStatus('copied');
+      window.setTimeout(() => setCopyStatus('idle'), 2500);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to copy this ProofStamp.');
+    }
+  }
+
+  function handleDownloadProofStamp(): void {
+    if (!proof || !hash) return;
+
+    setError('');
+    downloadText(receiptToText(proof, hash), `proofstamp-${proof.uid.slice(2, 14)}.txt`);
   }
 
   function handleCheckFileChange(nextFile: File | null): void {
@@ -115,12 +204,12 @@ export default function App() {
   async function handleCheck(): Promise<void> {
     if (!checkFile) return;
 
-    const proofId = checkProofId.trim();
+    const proofId = extractProofId(checkProofId);
     setCheckError('');
     setCheckResult(null);
 
-    if (!isBytes32(proofId)) {
-      setCheckError('Paste a valid Proof ID / EAS UID beginning with 0x and containing 64 hex characters.');
+    if (!proofId) {
+      setCheckError('Paste a saved ProofStamp receipt or a valid Proof ID / EAS UID.');
       return;
     }
 
@@ -291,7 +380,7 @@ export default function App() {
               </div>
             ) : null}
 
-            {proof ? (
+            {proof && hash ? (
               <div className="prepared proof-complete" aria-live="polite">
                 <div className="prepared-heading">
                   <span className="status-mark" aria-hidden="true">✓</span>
@@ -301,14 +390,34 @@ export default function App() {
                   </div>
                 </div>
 
-                <a
-                  className="blockchain-link"
-                  href={getArbiscanTransactionUrl(proof.transactionHash)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  View on blockchain
-                </a>
+                <div className="receipt-actions" aria-label="ProofStamp actions">
+                  <a
+                    className="receipt-action"
+                    href={getArbiscanTransactionUrl(proof.transactionHash)}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    View on blockchain
+                  </a>
+                  <button
+                    className="receipt-action"
+                    type="button"
+                    onClick={() => void handleCopyProofStamp()}
+                  >
+                    {copyStatus === 'copied' ? 'Copied ✓' : 'Copy ProofStamp'}
+                  </button>
+                  <button
+                    className="receipt-action"
+                    type="button"
+                    onClick={handleDownloadProofStamp}
+                  >
+                    Download ProofStamp
+                  </button>
+                </div>
+
+                <p className="receipt-note">
+                  Save the ProofStamp separately from the original file. You can paste the whole receipt into Check later.
+                </p>
 
                 <details>
                   <summary>Technical details</summary>
@@ -335,8 +444,8 @@ export default function App() {
             <div className="check-intro">
               <h2>Check a ProofStamp</h2>
               <p>
-                Choose the original file and paste its Proof ID. The file is hashed on this device and
-                compared with the public Arbitrum attestation.
+                Choose the original file and paste the saved ProofStamp or its Proof ID. The file is hashed
+                on this device and compared with the public Arbitrum attestation.
               </p>
             </div>
 
@@ -358,16 +467,16 @@ export default function App() {
             ) : null}
 
             <label className="field">
-              <span>Proof ID / EAS UID</span>
+              <span>ProofStamp or Proof ID / EAS UID</span>
               <textarea
-                rows={3}
+                rows={6}
                 value={checkProofId}
                 onChange={(event) => {
                   setCheckProofId(event.target.value);
                   setCheckResult(null);
                   setCheckError('');
                 }}
-                placeholder="0x…"
+                placeholder="Paste the saved ProofStamp receipt or 0x…"
               />
             </label>
 
