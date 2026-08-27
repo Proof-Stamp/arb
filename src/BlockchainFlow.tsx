@@ -180,7 +180,7 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
             disabled={isRecording || sendTransaction.isPending}
             onClick={() => void handleRecord()}
           >
-            {isRecording || sendTransaction.isPending ? 'Creating ProofStamp…' : 'Create ProofStamp'}
+            {isRecording || sendTransaction.isPending ? 'Recording on Arbitrum…' : 'Record on Arbitrum'}
           </button>
           <button
             className="secondary"
