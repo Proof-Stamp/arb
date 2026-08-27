@@ -64,7 +64,31 @@ Schema properties:
 
 The schema UID is derived deterministically using the same packed encoding and Keccak-256 rule as the EAS SchemaRegistry contract. The expected UID is pinned in source and the test suite independently recomputes it from the schema definition, resolver, and revocability flag.
 
-The schema has not been registered by this repository yet. Registration is a separate, explicit step. Once registered with the values above, the returned UID must match the pinned value before we proceed.
+The schema has not been registered by this repository yet. Registration is a separate, explicit maintainer action. Once registered with the values above, the returned UID must match the pinned value before we proceed.
+
+### One-time schema registration
+
+The repository contains a deliberately narrow registration script. It first recomputes the expected UID, checks the connected chain, and reads the SchemaRegistry. If the schema already exists and matches, it exits without sending a transaction.
+
+Read-only check:
+
+```bash
+npm run schema:check
+```
+
+Optional RPC override:
+
+```bash
+ARBITRUM_SEPOLIA_RPC_URL=https://your-rpc.example npm run schema:check
+```
+
+To register the schema, use a dedicated funded **testnet maintainer wallet** and provide its private key only as a process environment variable:
+
+```bash
+PROOFSTAMP_MAINTAINER_PRIVATE_KEY=0x... npm run schema:register
+```
+
+Never put this private key in a `VITE_*` variable, `.env.example`, GitHub issue, PR, CI log, or committed file. The script verifies the resulting on-chain schema after the transaction and prints the Arbiscan transaction link and block number.
 
 ## Hash encoding rule
 
@@ -85,8 +109,9 @@ The bootstrap application currently includes:
 - pinned, deterministic ProofStamp V1 schema identity
 - exact `bytes32 contentHash` encoding and decoding tests
 - direct Viem helpers for `EAS.getAttestation(uid)` and `SchemaRegistry.getSchema(uid)`
+- guarded one-time EAS schema registration tooling for maintainers
 
-Blockchain writes, passkeys, gas sponsorship, and receipt routes are not enabled yet.
+Blockchain ProofStamp writes, passkeys, gas sponsorship, and receipt routes are not enabled yet.
 
 ## Independent verification architecture
 
