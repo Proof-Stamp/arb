@@ -1,65 +1,54 @@
 # Cloudflare Pages deployment
 
-This app is designed to be deployed as a static Vite site on Cloudflare Pages.
+ProofStamp via Arbitrum is a static Vite application deployed on Cloudflare Pages.
 
-## Testnet preview
+## Build
 
-For the current private test branch use:
-
-- Production branch: `feat/bootstrap-arbitrum-v0`
 - Framework preset: React (Vite)
 - Build command: `npm run build`
-- Build output directory: `dist`
+- Output directory: `dist`
+- Node.js: 22 (`.nvmrc`)
+- Production branch after merge: `main`
 
-Before launch, switch production back to `main` after the reviewed PR is merged.
+`public/_redirects` provides the SPA fallback. `public/_headers` sets baseline security headers, prevents stale HTML caching and allows immutable caching for hashed Vite assets.
 
-The repository includes `.nvmrc` with Node.js 22, `public/_redirects` for SPA fallback, and `public/_headers` for baseline response headers.
+## Public environment variables
 
-## Environment variables
+Never put secrets in `VITE_*` values. They are embedded in browser JavaScript.
 
-Do not add secrets to variables prefixed with `VITE_`. Vite embeds them into browser JavaScript.
+- `VITE_ZERODEV_PROJECT_ID` — required ZeroDev browser project ID
+- `VITE_ZERODEV_RP_ID` — optional explicit WebAuthn relying-party ID
+- `VITE_ARBITRUM_SEPOLIA_RPC_URL` — optional public RPC override
 
-Public client configuration:
+The ZeroDev project ID is not a secret. Sponsorship controls are the security boundary.
 
-- `VITE_ARBITRUM_SEPOLIA_RPC_URL`: optional public RPC override
-- `VITE_ZERODEV_PROJECT_ID`: ZeroDev project identifier used by the browser wallet connector
-- `VITE_ZERODEV_RP_ID`: optional explicit WebAuthn relying-party ID
+## ZeroDev
 
-The ZeroDev project ID is client-visible configuration, not a secret. Sponsorship safety must come from ZeroDev gas policies, not from trying to hide this value.
+For the deployed origin:
 
-## ZeroDev preview setup
+1. allow the exact web origin in the ZeroDev project ACL,
+2. enable Arbitrum Sepolia,
+3. restrict sponsorship to the EAS contract/function used by ProofStamp,
+4. apply rate and spend limits.
 
-In the ZeroDev dashboard:
+Do not use an unrestricted sponsor-all policy for a public deployment.
 
-1. Create a project with Arbitrum Sepolia enabled.
-2. Add the exact Cloudflare preview origin to the project's ACL allowlist.
-3. Configure a gas sponsorship policy for Arbitrum Sepolia.
-4. Add `VITE_ZERODEV_PROJECT_ID` to the Cloudflare Pages project and redeploy.
+## Passkey domain
 
-For early testnet work, a broad policy may be used briefly. Before the repository or app is public, restrict sponsorship to the expected ProofStamp contracts and apply rate / spend limits.
+WebAuthn credentials are scoped to the relying-party ID. Passkeys created on `*.pages.dev` should be treated as testnet credentials.
 
-## Custom domain and passkeys
+Before moving real users to a custom domain, decide the final hostname/RP ID, add that origin to the ZeroDev ACL and expect users to create production passkeys for that domain.
 
-Passkeys are scoped to a WebAuthn RP ID. A passkey created on a temporary `*.pages.dev` hostname should be treated as disposable testnet state.
-
-Before real production users create passkeys:
-
-1. attach the intended ProofStamp custom domain,
-2. set `VITE_ZERODEV_RP_ID` deliberately if subdomain sharing is required,
-3. add the final origin to the ZeroDev ACL,
-4. do not change the RP ID afterwards unless users are expected to register new passkeys.
-
-## Current preview scope
-
-The browser flow is wired for:
+## Current testnet flow
 
 ```text
 choose file
 → SHA-256 locally
 → passkey
-→ sponsored ZeroDev transaction
-→ EAS attestation
-→ Proof ID + Arbitrum transaction receipt
+→ sponsored transaction
+→ EAS Content Hash attestation
+→ direct EAS read-back
+→ ProofStamp receipt
 ```
 
-The EAS write is intentionally blocked until the canonical ProofStamp schema is present on Arbitrum Sepolia. The schema remains `bytes32 contentHash`, zero resolver, non-revocable.
+V0 reuses the existing revocable EAS `bytes32 contentHash` schema with UID `0xdf4c41ea0f6263c72aa385580124f41f2898d3613e86c50519fc3cfd7ff13ad4`. No custom schema registration is required for V0.
