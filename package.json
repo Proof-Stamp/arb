@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@tanstack/react-query": "5.102.7",
+    "@turnkey/http": "3.12.1",
+    "@turnkey/webauthn-stamper": "0.6.0",
     "@wagmi/core": "3.6.4",
     "@zerodev/wallet-core": "0.0.4",
     "@zerodev/wallet-react": "0.0.6",
