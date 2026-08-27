@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ProofStamp">
+  <circle cx="32" cy="32" r="30" fill="#162d52"/>
+  <circle cx="32" cy="32" r="21" fill="#ffffff"/>
+  <path d="M22 17h13.5c8.4 0 13.5 4.4 13.5 11.3 0 7.3-5.5 11.7-14.2 11.7H30v9h-8V17Zm8 7v9h4.4c4.2 0 6.4-1.5 6.4-4.6 0-2.9-2.1-4.4-6.1-4.4H30Z" fill="#162d52"/>
+</svg>
