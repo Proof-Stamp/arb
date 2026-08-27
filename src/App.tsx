@@ -36,6 +36,7 @@ type CopyStatus = 'idle' | 'copied';
 
 const IS_ZERODEV_CONFIGURED =
   (import.meta.env.VITE_ZERODEV_PROJECT_ID?.trim() ?? '').length > 0;
+const MAX_RECEIPT_FILE_BYTES = 256 * 1024;
 
 const BUILD_COMMIT_SHA = __BUILD_COMMIT_SHA__.trim();
 const BUILD_REFERENCE = BUILD_COMMIT_SHA === 'local' ? 'local' : BUILD_COMMIT_SHA.slice(0, 8);
@@ -81,7 +82,7 @@ function receiptToText(proof: ProofResult, hash: Sha256Hex): string {
     `Explorer: ${getArbiscanTransactionUrl(proof.transactionHash)}`,
     '',
     'Check this ProofStamp:',
-    'Open the ProofStamp via Arbitrum app, choose the exact original file, open Check, and paste this receipt.',
+    'Open the ProofStamp via Arbitrum app, choose the exact original file, open Check, then upload this receipt or paste it.',
     '',
     'The file was not uploaded. Only its SHA-256 fingerprint was recorded publicly.',
     'A ProofStamp can show that specific bytes were recorded at a time. It does not prove that the content itself is true or authentic.',
@@ -132,6 +133,7 @@ export default function App() {
 
   const [checkFile, setCheckFile] = useState<File | null>(null);
   const [checkProofId, setCheckProofId] = useState('');
+  const [checkReceiptName, setCheckReceiptName] = useState('');
   const [checkError, setCheckError] = useState('');
   const [isChecking, setIsChecking] = useState(false);
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
@@ -209,6 +211,30 @@ export default function App() {
     setCheckError('');
   }
 
+  async function handleCheckReceiptFile(receiptFile: File | null): Promise<void> {
+    if (!receiptFile) return;
+
+    setCheckError('');
+    setCheckResult(null);
+    setCheckReceiptName('');
+
+    if (receiptFile.size > MAX_RECEIPT_FILE_BYTES) {
+      setCheckError('This ProofStamp receipt is unexpectedly large. Choose the saved .txt ProofStamp file.');
+      return;
+    }
+
+    try {
+      const receiptText = await receiptFile.text();
+      if (!extractProofId(receiptText)) {
+        throw new Error('This file does not contain a valid ProofStamp Proof ID.');
+      }
+      setCheckProofId(receiptText);
+      setCheckReceiptName(receiptFile.name);
+    } catch (caught) {
+      setCheckError(caught instanceof Error ? caught.message : 'Unable to read this ProofStamp file.');
+    }
+  }
+
   async function handleCheck(): Promise<void> {
     if (!checkFile) return;
 
@@ -217,7 +243,7 @@ export default function App() {
     setCheckResult(null);
 
     if (!proofId) {
-      setCheckError('Paste a saved ProofStamp receipt or a valid Proof ID / EAS UID.');
+      setCheckError('Upload a saved ProofStamp receipt or paste a valid Proof ID / EAS UID.');
       return;
     }
 
@@ -424,7 +450,7 @@ export default function App() {
                 </div>
 
                 <p className="receipt-note">
-                  Save the ProofStamp separately from the original file. You can paste the whole receipt into Check later.
+                  Save the ProofStamp separately from the original file. You can upload the receipt in Check later.
                 </p>
 
                 <details>
@@ -452,8 +478,8 @@ export default function App() {
             <div className="check-intro">
               <h2>Check a ProofStamp</h2>
               <p>
-                Choose the original file and paste the saved ProofStamp or its Proof ID. The file is hashed
-                on this device and compared with the public Arbitrum attestation.
+                Choose the original file, then upload its saved ProofStamp receipt or paste the Proof ID.
+                Everything is read locally before the public Arbitrum attestation is checked.
               </p>
             </div>
 
@@ -474,13 +500,32 @@ export default function App() {
               </div>
             ) : null}
 
+            <label className="file-picker check-picker">
+              <span className="picker-icon" aria-hidden="true">＋</span>
+              <strong>{checkReceiptName ? 'Choose a different ProofStamp file' : 'Upload ProofStamp file'}</strong>
+              <small>Saved .txt receipt · read only on this device</small>
+              <input
+                type="file"
+                accept=".txt,text/plain"
+                onChange={(event) => void handleCheckReceiptFile(event.target.files?.[0] ?? null)}
+              />
+            </label>
+
+            {checkReceiptName ? (
+              <div className="file-summary" aria-live="polite">
+                <strong>{checkReceiptName}</strong>
+                <span>Receipt ready</span>
+              </div>
+            ) : null}
+
             <label className="field">
-              <span>ProofStamp or Proof ID / EAS UID</span>
+              <span>Or paste ProofStamp / Proof ID</span>
               <textarea
-                rows={6}
+                rows={5}
                 value={checkProofId}
                 onChange={(event) => {
                   setCheckProofId(event.target.value);
+                  setCheckReceiptName('');
                   setCheckResult(null);
                   setCheckError('');
                 }}
