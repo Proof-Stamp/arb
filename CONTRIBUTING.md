@@ -14,7 +14,7 @@ Requirements:
 Install and run:
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
@@ -28,7 +28,9 @@ npm test
 npm run build
 ```
 
-This prototype does not require paid GitHub Actions. Run the checks above locally before submitting changes. Cloudflare Pages provides the deployment build check for the hosted testnet app.
+Pull requests to `main` also run a small GitHub Actions CI job with the core checks: lint, unit tests, and the production build. The build includes TypeScript type checking.
+
+Run the full local checklist above before submitting changes. Cloudflare Pages remains the deployment build check for the hosted testnet app.
 
 ## Project rules
 
