@@ -7,6 +7,7 @@ import { ARBITRUM_SEPOLIA_CHAIN_ID } from './config/arbitrum';
 import { createArbitrumSepoliaPublicClient, readEasAttestation, readProofStampSchema } from './lib/eas/client';
 import {
   decodeProofStampData,
+  PROOFSTAMP_ATTESTATION_REVOCABLE,
   PROOFSTAMP_SCHEMA,
   PROOFSTAMP_SCHEMA_RESOLVER,
   PROOFSTAMP_SCHEMA_REVOCABLE,
@@ -166,7 +167,7 @@ function BlockchainFlowInner({ hash, onProof, onError }: BlockchainFlowProps) {
         attestation.uid.toLowerCase() !== uid.toLowerCase() ||
         attestation.schema.toLowerCase() !== PROOFSTAMP_SCHEMA_UID.toLowerCase() ||
         attestation.recipient.toLowerCase() !== zeroAddress.toLowerCase() ||
-        attestation.revocable !== PROOFSTAMP_SCHEMA_REVOCABLE ||
+        attestation.revocable !== PROOFSTAMP_ATTESTATION_REVOCABLE ||
         recordedHash.toLowerCase() !== hash.toLowerCase()
       ) {
         throw new Error('The recorded attestation did not match the prepared ProofStamp.');
