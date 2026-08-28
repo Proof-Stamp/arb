@@ -1,0 +1,51 @@
+.receipt-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.receipt-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid rgba(7, 27, 44, 0.18);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--navy);
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+}
+
+.receipt-action:hover {
+  background: #f7f9f8;
+}
+
+.receipt-action:focus-visible {
+  outline: 3px solid rgba(15, 159, 116, 0.24);
+  outline-offset: 2px;
+}
+
+.receipt-note {
+  margin: 10px 0 0;
+  color: #53645f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+@media (max-width: 700px) {
+  .receipt-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .receipt-action {
+    min-height: 50px;
+  }
+}
