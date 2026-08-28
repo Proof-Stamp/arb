@@ -1,5 +1,8 @@
 # ProofStamp via Arbitrum
 
+[![CI](https://github.com/Proof-Stamp/arb/actions/workflows/ci.yml/badge.svg)](https://github.com/Proof-Stamp/arb/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 <p align="center">
   <img src="docs/assets/proofstamp-arbitrum-banner.svg" alt="ProofStamp via Arbitrum: create, record, verify" width="100%">
 </p>
