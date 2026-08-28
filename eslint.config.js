@@ -13,6 +13,13 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/App.tsx'],
+    rules: {
+      // Receipt filename sanitization intentionally matches C0 control characters.
+      'no-control-regex': 'off',
+    },
+  },
+  {
     files: ['*.{js,mjs,cjs}'],
     languageOptions: {
       globals: globals.node,
