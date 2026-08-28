@@ -344,7 +344,7 @@ export default function App() {
           <a className="brand" href="/" aria-label="ProofStamp home">
             <img
               className="brand-mark"
-              src="/proofstamp-seal.png"
+              src="/proofstamp-seal.png?v=2"
               width="46"
               height="46"
               alt=""
