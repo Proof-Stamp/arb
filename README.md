@@ -1,6 +1,8 @@
 # ProofStamp via Arbitrum
 
-![ProofStamp via Arbitrum](docs/assets/proofstamp-arbitrum-readme.webp)
+<p align="center">
+  <img src="docs/assets/proofstamp-arbitrum-banner.svg" alt="ProofStamp via Arbitrum: create, record, verify" width="100%">
+</p>
 
 A small testnet prototype for creating independently verifiable evidence for a file without uploading the file itself.
 
