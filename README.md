@@ -1,5 +1,7 @@
 # ProofStamp via Arbitrum
 
+![ProofStamp via Arbitrum](https://raw.githubusercontent.com/Proof-Stamp/arb/main/docs/assets/proofstamp-arbitrum-readme.png)
+
 A small testnet prototype for creating independently verifiable evidence for a file without uploading the file itself.
 
 **Live testnet app:** https://arbitrum-testnet.proofstamp.org/
