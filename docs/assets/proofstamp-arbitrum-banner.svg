@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="470" viewBox="0 0 1380 470" role="img" aria-labelledby="title desc">
+  <title id="title">ProofStamp via Arbitrum</title>
+  <desc id="desc">Make proof of existence verifiable. Hash a file locally, record an EAS attestation on Arbitrum Sepolia, and verify it independently.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071c30"/>
+      <stop offset="1" stop-color="#082238"/>
+    </linearGradient>
+    <linearGradient id="orb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#103f76"/>
+      <stop offset="1" stop-color="#052747"/>
+    </linearGradient>
+  </defs>
+  <rect width="1380" height="470" rx="28" fill="url(#bg)"/>
+  <g opacity="0.06" stroke="#7fc8ff">
+    <path d="M0 94H1380M0 188H1380M0 282H1380M0 376H1380"/>
+    <path d="M138 0V470M276 0V470M414 0V470M552 0V470M690 0V470M828 0V470M966 0V470M1104 0V470M1242 0V470"/>
+  </g>
+
+  <g transform="translate(54 42)">
+    <circle cx="34" cy="34" r="32" fill="#0d2945" stroke="#9fc8e8" stroke-width="1.5"/>
+    <circle cx="34" cy="34" r="25" fill="none" stroke="#eaf5ff" stroke-width="2" opacity="0.9"/>
+    <text x="34" y="43" text-anchor="middle" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="700">PS</text>
+    <text x="88" y="43" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="700" letter-spacing="2">PROOFSTAMP</text>
+    <rect x="292" y="13" width="70" height="38" rx="19" fill="#0d3764" stroke="#1686e7"/>
+    <text x="327" y="39" text-anchor="middle" fill="#57b9ff" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="700">ARB</text>
+  </g>
+
+  <text x="56" y="177" fill="#ffffff" font-family="Arial, Helvetica, sans-serif" font-size="48" font-weight="700">Make proof of existence <tspan fill="#42a5ff">verifiable.</tspan></text>
+  <text x="56" y="228" fill="#e3eef7" font-family="Arial, Helvetica, sans-serif" font-size="23">Locally hash any file and record an attestation on Arbitrum Sepolia.</text>
+  <text x="56" y="262" fill="#e3eef7" font-family="Arial, Helvetica, sans-serif" font-size="23">Verify independently. No uploads. No ProofStamp account.</text>
+
+  <g transform="translate(56 307)" font-family="Arial, Helvetica, sans-serif">
+    <circle cx="31" cy="31" r="31" fill="url(#orb)" stroke="#14518a"/>
+    <path d="M20 20h20v25H20zM25 15h10l5 5H25z" fill="#48aaff" opacity="0.95"/>
+    <text x="76" y="26" fill="#fff" font-size="23" font-weight="700">Create</text>
+    <text x="76" y="54" fill="#dbe8f2" font-size="19">Hash your file locally</text>
+    <path d="M238 31h62" stroke="#66839b" stroke-width="3" stroke-dasharray="4 10"/>
+
+    <circle cx="337" cy="31" r="31" fill="url(#orb)" stroke="#14518a"/>
+    <path d="M337 15l15 7v12c0 10-7 18-15 23-8-5-15-13-15-23V22z" fill="#48aaff" opacity="0.95"/>
+    <text x="382" y="26" fill="#fff" font-size="23" font-weight="700">Record</text>
+    <text x="382" y="54" fill="#dbe8f2" font-size="19">Attest on Arbitrum Sepolia</text>
+    <path d="M590 31h62" stroke="#66839b" stroke-width="3" stroke-dasharray="4 10"/>
+
+    <circle cx="689" cy="31" r="31" fill="url(#orb)" stroke="#14518a"/>
+    <path d="M674 31l10 10 20-23" fill="none" stroke="#48aaff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="734" y="26" fill="#fff" font-size="23" font-weight="700">Verify</text>
+    <text x="734" y="54" fill="#dbe8f2" font-size="19">Check</text>
+  </g>
+
+  <g transform="translate(915 34)" font-family="Arial, Helvetica, sans-serif">
+    <rect width="412" height="382" rx="22" fill="#0b263f" stroke="#7690a4" stroke-width="1.5"/>
+    <circle cx="49" cy="54" r="20" fill="none" stroke="#1ee889" stroke-width="4"/>
+    <path d="M39 54l7 7 13-15" fill="none" stroke="#1ee889" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="88" y="48" fill="#c6d5e2" font-size="14" letter-spacing="1.5">EXAMPLE STATUS</text>
+    <text x="88" y="73" fill="#1ee889" font-size="24" font-weight="700">Verified</text>
+
+    <text x="28" y="126" fill="#c6d5e2" font-size="15" letter-spacing="1.5">SHA-256</text>
+    <rect x="28" y="143" width="356" height="64" rx="10" fill="#152f48" stroke="#29465d"/>
+    <text x="48" y="183" fill="#f2f7fb" font-family="monospace" font-size="18">9f21d0a7…b84e31c2</text>
+
+    <path d="M28 229H384" stroke="#52697b" opacity="0.75"/>
+    <text x="28" y="263" fill="#c6d5e2" font-size="15" letter-spacing="1.5">ARBITRUM SEPOLIA</text>
+    <text x="28" y="296" fill="#42a5ff" font-size="21">View on Arbiscan ↗</text>
+
+    <path d="M28 319H384" stroke="#52697b" opacity="0.75"/>
+    <text x="28" y="351" fill="#c6d5e2" font-size="15" letter-spacing="1.5">PORTABLE RECEIPT</text>
+    <text x="28" y="377" fill="#42a5ff" font-size="19">Inspectable. Detached. Yours.</text>
+  </g>
+</svg>
