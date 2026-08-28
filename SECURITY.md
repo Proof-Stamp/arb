@@ -16,12 +16,15 @@ Please report security issues privately to `info@proofstamp.org`. Do not put exp
 - ZeroDev gas sponsorship is a security boundary and must remain constrained by contract/function allowlists, rate limits and spend limits.
 - Successful creation is reported only after the app reads the EAS attestation back from Arbitrum and verifies the recorded hash.
 - The Check flow reads EAS directly and does not depend on an EAS explorer or ProofStamp application backend.
+- The saved `.txt` receipt is not trusted for the file hash during Check. It supplies the Proof ID / EAS UID; the original file is hashed again locally.
 
 ## Passkeys
 
 Passkey authentication is provided through the browser/platform WebAuthn flow and ZeroDev. ProofStamp must never request a user's device PIN, biometric data, seed phrase, or private key.
 
-WebAuthn credentials are scoped to their relying-party ID. Test passkeys created on a temporary `*.pages.dev` hostname should be treated as testnet credentials.
+WebAuthn credentials are scoped to their relying-party ID. Temporary `*.pages.dev` previews and the stable custom domain should be treated as distinct test contexts unless the RP-ID configuration deliberately says otherwise.
+
+Prototype compatibility observations, including the tested Windows Hello RS256 registration failure and the decision not to force ES256 in the frontend, are documented in [docs/passkeys.md](docs/passkeys.md).
 
 ## Known privacy properties
 

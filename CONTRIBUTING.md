@@ -39,3 +39,18 @@ npm run build
 - Add tests for cryptographic encoding and verification behavior.
 
 For security-sensitive changes, explain the trust boundary and failure mode in the pull request.
+
+## Review before commit
+
+Do not commit based only on the code change looking plausible. Review the actual result first.
+
+Before each commit:
+
+1. inspect the complete final diff,
+2. run the relevant build/tests where feasible,
+3. visually inspect UI or image changes at the real rendered size,
+4. verify asset paths, URLs, domains, and environment assumptions,
+5. confirm that no unrelated files changed,
+6. only then commit and open/update the pull request.
+
+For documentation-only changes, the same rule applies: verify links, paths, diagrams, commands, addresses, and claims against the current implementation before committing.
