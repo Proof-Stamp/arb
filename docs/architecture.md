@@ -78,7 +78,7 @@ Browser
  │
  │ extract UID
  │ getAttestation(UID)
- │ validate schema + recipient + revocability + contentHash
+ │ validate schema + recipient + non-revocable + contentHash
  ▼
 ProofStamp recorded
  │
@@ -87,7 +87,7 @@ ProofStamp recorded
  └── download <name>_proofstamp.txt
 ```
 
-The application does not treat a transaction hash alone as success. It waits for the receipt, extracts the EAS UID, reads the attestation back, and verifies that the recorded value matches the locally prepared SHA-256.
+The application does not treat a transaction hash alone as success. It waits for the receipt, extracts the EAS UID, reads the attestation back, and verifies that the individual attestation is non-revocable and that the recorded value matches the locally prepared SHA-256.
 
 ## Verification sequence
 
@@ -134,7 +134,7 @@ Schema UID:
 
 The SHA-256 digest is stored as its exact 32 bytes. It is not Keccak-hashed again and is not stored as an ASCII/UTF-8 hex string.
 
-The current EAS Content Hash schema is revocable. The Check flow treats a revoked record as invalid.
+The reused EAS Content Hash schema is registered as revocable, but ProofStamp creation sets each individual attestation to `revocable: false`. The post-write read-back verifies that policy before showing success. The Check flow also treats any record with a nonzero revocation time as invalid.
 
 ## Trust boundaries
 
@@ -180,7 +180,7 @@ The prototype fails closed for the important verification checks:
 - If the configured EAS schema cannot be read or does not match the pinned schema properties, creation stops.
 - If the sponsored transaction fails, no success is shown.
 - If the transaction succeeds but the expected EAS UID cannot be found in logs, no success is shown.
-- If the read-back attestation does not match the UID/schema/recipient/revocability/hash expected by the app, no success is shown.
+- If the read-back attestation does not match the UID/schema/recipient/non-revocable policy/hash expected by the app, no success is shown.
 - During Check, a missing or malformed Proof ID is rejected.
 - During Check, a revoked attestation is treated as invalid.
 - During Check, a different file produces a different local SHA-256 and fails comparison.

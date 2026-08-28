@@ -17,6 +17,7 @@ A small testnet prototype for creating independently verifiable evidence for a f
 - A passkey can be used instead of a seed phrase.
 - The blockchain transaction can be sponsored so the user does not need testnet ETH.
 - The SHA-256 fingerprint is recorded as an Ethereum Attestation Service (EAS) `bytes32 contentHash` attestation on Arbitrum Sepolia.
+- The reused EAS Content Hash schema supports revocation, but each ProofStamp attestation is created with `revocable: false`.
 - Creation is reported as successful only after the app reads the attestation back from Arbitrum and validates it.
 - Verification does not trust the saved receipt for the file hash. The receipt is used only to recover the Proof ID / EAS UID.
 - The verifier hashes the original file locally, reads EAS directly from Arbitrum Sepolia, validates the schema, and compares the on-chain hash with the local hash.
@@ -56,7 +57,7 @@ There is no ProofStamp application database or file-upload API in this prototype
 └──────────────────┘
 ```
 
-After a successful write, the app extracts the EAS UID from the transaction logs, reads that attestation directly from Arbitrum Sepolia, and checks the UID, schema, recipient, revocability setting, and recorded SHA-256 before showing success.
+After a successful write, the app extracts the EAS UID from the transaction logs, reads that attestation directly from Arbitrum Sepolia, and checks the UID, schema, recipient, that the individual attestation is non-revocable, and the recorded SHA-256 before showing success.
 
 Downloaded receipts use the filename pattern:
 
@@ -129,10 +130,11 @@ See [docs/architecture.md](docs/architecture.md) for the component and trust-bou
 | SchemaRegistry | `0x45CB6Fa0870a8Af06796Ac15915619a0f22cd475` |
 | EAS schema | `bytes32 contentHash` |
 | Schema UID | `0xdf4c41ea0f6263c72aa385580124f41f2898d3613e86c50519fc3cfd7ff13ad4` |
-| Revocable | `true` |
+| EAS schema revocable | `true` |
+| ProofStamp attestation revocable | `false` |
 | Max file size in V0 | 100 MB |
 
-V0 reuses the standard EAS **Content Hash** schema. The SHA-256 digest is stored as the exact 32 bytes of `contentHash`. It is not re-hashed with Keccak and is not stored as UTF-8 hexadecimal text.
+V0 reuses the standard EAS **Content Hash** schema, which is registered as revocable. ProofStamp creation deliberately writes each individual attestation with `revocable: false`. The SHA-256 digest is stored as the exact 32 bytes of `contentHash`. It is not re-hashed with Keccak and is not stored as UTF-8 hexadecimal text.
 
 ## Passkeys and current compatibility
 
