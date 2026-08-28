@@ -11,6 +11,7 @@ Please report security issues privately to `info@proofstamp.org`. Do not put exp
 - Original file bytes are hashed locally in the browser and are not uploaded by the ProofStamp application flow.
 - SHA-256 is calculated over the exact file bytes.
 - V0 writes only the EAS `bytes32 contentHash` payload as ProofStamp application data.
+- The reused EAS schema supports revocation, but V0 creates individual ProofStamp attestations with `revocable: false` and verifies that property after the write.
 - Blockchain transaction metadata, including the attester address, is public.
 - `VITE_*` values are public browser configuration and must never contain secrets.
 - ZeroDev gas sponsorship is a security boundary and must remain constrained by contract/function allowlists, rate limits and spend limits.

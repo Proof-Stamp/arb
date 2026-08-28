@@ -1,6 +1,6 @@
 # Privacy
 
-_Last updated: August 27, 2026_
+_Last updated: August 28, 2026_
 
 This notice describes the current ProofStamp via Arbitrum testnet application in this repository.
 
@@ -18,7 +18,7 @@ Creating a ProofStamp intentionally creates a public blockchain record. V0 publi
 
 The original filename and file contents are not intentionally written on-chain by this application.
 
-Public blockchain records may be effectively permanent even if an attestation is later marked revoked.
+Current V0 creation sets each individual ProofStamp attestation to `revocable: false`. The reused EAS Content Hash schema itself supports revocation, but this application does not enable it for newly created ProofStamps. Public transaction and attestation data remains on-chain.
 
 ## Important hash privacy property
 
