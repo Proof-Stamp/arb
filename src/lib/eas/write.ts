@@ -3,7 +3,7 @@ import { EAS_CONTRACT_ADDRESS } from '../../config/arbitrum';
 import type { Sha256Hex } from '../hash';
 import {
   encodeProofStampData,
-  PROOFSTAMP_SCHEMA_REVOCABLE,
+  PROOFSTAMP_ATTESTATION_REVOCABLE,
   PROOFSTAMP_SCHEMA_UID,
 } from './schema';
 
@@ -63,7 +63,7 @@ export function createProofStampAttestCalldata(contentHash: Sha256Hex): Hex {
         data: {
           recipient: zeroAddress,
           expirationTime: 0n,
-          revocable: PROOFSTAMP_SCHEMA_REVOCABLE,
+          revocable: PROOFSTAMP_ATTESTATION_REVOCABLE,
           refUID: ZERO_UID,
           data: encodeProofStampData(contentHash),
           value: 0n,
