@@ -11,6 +11,12 @@
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
 
+/favicon.svg
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/brand/*
+  Cache-Control: public, max-age=3600
+
 /proofstamp-seal.png
   Cache-Control: no-cache, no-store, must-revalidate
 
