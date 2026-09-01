@@ -1,0 +1,14 @@
+.proof-complete::after {
+  content: none;
+}
+
+.proof-complete .status-mark,
+.check-result.success .check-result-icon {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: url('/brand/proof-point-card-marker.svg') center / contain no-repeat;
+  color: transparent;
+  font-size: 0;
+}
