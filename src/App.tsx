@@ -361,7 +361,7 @@ export default function App() {
         </header>
 
         <section className="hero" aria-labelledby="page-title">
-          <h1 id="page-title">Proof a file on Arbitrum.</h1>
+          <h1 id="page-title">ProofStamp a file on Arbitrum.</h1>
           <p className="lede">No upload. No seed phrase. Your device does the math.</p>
         </section>
 
