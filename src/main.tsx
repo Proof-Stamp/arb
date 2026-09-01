@@ -3,6 +3,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './mobile-progress';
+import './brand-tokens.css';
 import './styles.css';
 
 const STALE_CHUNK_RELOAD_KEY = 'proofstamp:stale-chunk-reload';
