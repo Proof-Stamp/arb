@@ -5,6 +5,7 @@ import App from './App';
 import './mobile-progress';
 import './brand-tokens.css';
 import './styles.css';
+import './proof-point-status.css';
 
 const STALE_CHUNK_RELOAD_KEY = 'proofstamp:stale-chunk-reload';
 
