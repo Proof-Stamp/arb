@@ -133,7 +133,7 @@ export default function App() {
   const [hash, setHash] = useState<Sha256Hex | null>(null);
   const [proof, setProof] = useState<ProofResult | null>(null);
   const [error, setError] = useState<string>('');
-  const [technicalError, setTechnicalError] = useState<string>('');
+  const [technicalError, setTechnicalError] = useState('');
   const [isPreparing, setIsPreparing] = useState(false);
   const [isLoadingBlockchain, setIsLoadingBlockchain] = useState(false);
   const [BlockchainFlow, setBlockchainFlow] = useState<BlockchainFlowComponent | null>(null);
@@ -361,7 +361,7 @@ export default function App() {
         </header>
 
         <section className="hero" aria-labelledby="page-title">
-          <h1 id="page-title">Proof a file on Arbitrum.</h1>
+          <h1 id="page-title">ProofStamp a file on Arbitrum.</h1>
           <p className="lede">No upload. No seed phrase. Your device does the math.</p>
         </section>
 
@@ -437,7 +437,6 @@ export default function App() {
                       <p>Your file has not left this browser.</p>
                     </div>
                   </div>
-
                   {!IS_ZERODEV_CONFIGURED ? (
                     <div className="next-step setup-note">
                       <strong>Blockchain connection is not configured yet</strong>
@@ -657,7 +656,6 @@ export default function App() {
                       </strong>
                     </div>
                   </div>
-
                   <details>
                     <summary>Technical details</summary>
                     <div className="result">
