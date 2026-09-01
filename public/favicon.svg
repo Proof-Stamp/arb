@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ProofStamp">
-  <circle cx="32" cy="32" r="30" fill="#162d52"/>
-  <circle cx="32" cy="32" r="21" fill="#ffffff"/>
-  <path d="M22 17h13.5c8.4 0 13.5 4.4 13.5 11.3 0 7.3-5.5 11.7-14.2 11.7H30v9h-8V17Zm8 7v9h4.4c4.2 0 6.4-1.5 6.4-4.6 0-2.9-2.1-4.4-6.1-4.4H30Z" fill="#162d52"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="ProofStamp compact mark">
+<rect width="512" height="512" rx="92" fill="#162D52"/>
+<g fill="#FFFFFF" transform="translate(100,385) scale(0.31,-0.31)"><path d="M649 521C649 675 527 742 369 742H102C92 742 88 738 88 727V15C88 5 93 0 104 0H191C203 0 209 5 209 17V292C209 298 212 302 219 302H383C539 302 649 374 649 521ZM525 524C525 434 464 391 369 391H220C212 391 209 396 209 406V639C209 649 213 653 224 653H362C460 653 525 617 525 524Z"/></g>
+<circle cx="395.5" cy="180.3" r="25.3" fill="#FFFFFF"/>
 </svg>
