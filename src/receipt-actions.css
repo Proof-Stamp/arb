@@ -11,31 +11,32 @@
   justify-content: center;
   min-height: 46px;
   padding: 10px 12px;
-  border: 1px solid rgba(7, 27, 44, 0.18);
-  border-radius: 9px;
-  background: #fff;
-  color: var(--navy);
+  border: 1px solid var(--ps-blue);
+  border-radius: 8px;
+  background: var(--ps-white);
+  color: var(--ps-blue);
   cursor: pointer;
   font: inherit;
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.2;
   text-align: center;
   text-decoration: none;
 }
 
 .receipt-action:hover {
-  background: #f7f9f8;
+  background: var(--ps-tint);
+  color: var(--ps-blue-hover);
 }
 
 .receipt-action:focus-visible {
-  outline: 3px solid rgba(15, 159, 116, 0.24);
+  outline: 3px solid var(--ps-focus);
   outline-offset: 2px;
 }
 
 .receipt-note {
   margin: 10px 0 0;
-  color: #53645f;
+  color: var(--ps-muted);
   font-size: 13px;
   line-height: 1.5;
 }
