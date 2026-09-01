@@ -1,0 +1,21 @@
+:root {
+  --ps-blue: #162D52;
+  --ps-blue-hover: #0E2344;
+  --ps-graphite: #1B1F24;
+  --ps-muted: #66717E;
+  --ps-border: #D8DEE6;
+  --ps-surface: #F4F6F8;
+  --ps-tint: #E8EDF3;
+  --ps-white: #FFFFFF;
+  --ps-success: #1F6B45;
+  --ps-warning: #8A5A00;
+  --ps-danger: #A63A32;
+
+  --ps-font-sans: "Libre Franklin", Arial, sans-serif;
+  --ps-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+body { font-family: var(--ps-font-sans); color: var(--ps-graphite); background: var(--ps-white); }
+a { color: var(--ps-blue); }
+a:hover { color: var(--ps-blue-hover); }
+code, .hash, .txid, .timestamp { font-family: var(--ps-font-mono); }
