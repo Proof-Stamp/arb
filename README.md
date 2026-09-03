@@ -135,7 +135,7 @@ See [docs/architecture.md](docs/architecture.md) for the component and trust-bou
 | Schema UID | `0xdf4c41ea0f6263c72aa385580124f41f2898d3613e86c50519fc3cfd7ff13ad4` |
 | EAS schema revocable | `true` |
 | ProofStamp attestation revocable | `false` |
-| Max file size in V0 | 100 MB |
+| Max file size in V0 | 25 MB |
 
 V0 reuses the standard EAS **Content Hash** schema, which is registered as revocable. ProofStamp creation deliberately writes each individual attestation with `revocable: false`. The SHA-256 digest is stored as the exact 32 bytes of `contentHash`. It is not re-hashed with Keccak and is not stored as UTF-8 hexadecimal text.
 
