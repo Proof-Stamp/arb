@@ -5,6 +5,7 @@ import { readEasAttestation } from './lib/eas/client';
 import { decodeProofStampData, PROOFSTAMP_SCHEMA_UID } from './lib/eas/schema';
 import { getArbiscanTransactionUrl } from './lib/eas/write';
 import { MAX_V0_FILE_BYTES, sha256Blob, type Sha256Hex } from './lib/hash';
+import { extractProofId, receiptToText } from './lib/receipt';
 import './receipt-actions.css';
 
 interface ProofResult {
@@ -56,44 +57,6 @@ function proofStampReceiptFilename(originalName: string): string {
   const lastDot = safeName.lastIndexOf('.');
   const baseName = lastDot > 0 ? safeName.slice(0, lastDot) : safeName;
   return `${baseName}_proofstamp.txt`;
-}
-
-function isBytes32(value: string): value is `0x${string}` {
-  return /^0x[0-9a-fA-F]{64}$/.test(value);
-}
-
-function extractProofId(value: string): `0x${string}` | null {
-  const trimmed = value.trim();
-  if (isBytes32(trimmed)) return trimmed;
-
-  const labelled = trimmed.match(
-    /(?:Proof ID\s*\/\s*EAS UID|EAS UID|Proof ID)\s*:\s*(0x[0-9a-fA-F]{64})/i,
-  )?.[1];
-
-  return labelled && isBytes32(labelled) ? labelled : null;
-}
-
-function receiptToText(proof: ProofResult, hash: Sha256Hex): string {
-  return [
-    'ProofStamp via Arbitrum',
-    'Testnet receipt',
-    '',
-    `Proof ID / EAS UID: ${proof.uid}`,
-    `SHA-256 / file fingerprint: ${hash}`,
-    `Recorded at: ${proof.recordedAt}`,
-    'Network: Arbitrum Sepolia',
-    `Chain ID: ${ARBITRUM_SEPOLIA_CHAIN_ID}`,
-    `Block: ${proof.blockNumber.toString()}`,
-    `Transaction: ${proof.transactionHash}`,
-    `EAS schema: ${PROOFSTAMP_SCHEMA_UID}`,
-    `Explorer: ${getArbiscanTransactionUrl(proof.transactionHash)}`,
-    '',
-    'Check this ProofStamp:',
-    'Open the ProofStamp via Arbitrum app, choose the exact original file, open Check, then upload this receipt or paste it.',
-    '',
-    'The file was not uploaded. Only its SHA-256 fingerprint was recorded publicly.',
-    'A ProofStamp can show that specific bytes were recorded at a time. It does not prove that the content itself is true or authentic.',
-  ].join('\n');
 }
 
 async function copyText(text: string): Promise<void> {
