@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Explore how ProofStamp records a file hash and detects changed bytes. A simulated Arbitrum Sepolia walkthrough with real sample hashes."
+    />
+    <title>ProofStamp · Interactive walkthrough</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./walkthrough.css" />
+    <script src="./walkthrough.js" defer></script>
+  </head>
+  <body>
+    <div id="ps-branded-demo">
+      <header class="ps-header">
+        <img
+          class="ps-wordmark"
+          src="/brand/proofstamp-wordmark-white.svg"
+          alt="ProofStamp"
+          width="190"
+          height="18"
+        />
+        <span>Interactive walkthrough</span>
+      </header>
+      <main class="ps-main">
+        <noscript>Enable JavaScript to switch between the four example steps.</noscript>
+        <div class="ps-intro">
+          <span class="ps-eyebrow">Add proof where it matters.</span>
+          <h1>A file you can verify later.</h1>
+          <span class="ps-secondary">Arbitrum Sepolia · simulated example</span>
+        </div>
+        <div class="ps-steps" aria-label="Walkthrough steps">
+          <button class="ps-step" type="button" data-step="0" aria-pressed="true">
+            1 · Prepare
+          </button>
+          <button class="ps-step" type="button" data-step="1" aria-pressed="false">
+            2 · ProofStamp
+          </button>
+          <button class="ps-step" type="button" data-step="2" aria-pressed="false">
+            3 · Check original
+          </button>
+          <button class="ps-step" type="button" data-step="3" aria-pressed="false">
+            4 · Check edited
+          </button>
+        </div>
+        <div class="ps-comparison" role="group" aria-label="File hash and public record">
+          <section class="ps-side">
+            <h3>Your device</h3>
+            <article class="ps-evidence">
+              <div class="ps-row">
+                <span class="ps-caption">Example file</span
+                ><span class="ps-caption" id="ps-copy-label">Original copy</span>
+              </div>
+              <span class="ps-filename">refund.txt</span>
+              <div class="ps-message">
+                <span id="ps-message">Refund approved.</span
+                ><span class="ps-caption">UTF-8 · trailing newline</span>
+              </div>
+              <span class="ps-caption">SHA-256 of the sample file</span
+              ><code class="ps-digest" id="ps-local-digest"
+                >18714e8fe0b77abb a8767969e2b4907a 36708b8132a746c1 e55be674dc0a829d</code
+              >
+            </article>
+            <div class="ps-side-note" id="ps-local-note">
+              The original file stays on your device.
+            </div>
+          </section>
+          <div class="ps-connection" aria-hidden="true">
+            <span class="ps-arrow" id="ps-arrow">→</span><span id="ps-path-label">Hash only</span>
+          </div>
+          <section class="ps-side">
+            <h3>Public record</h3>
+            <article class="ps-evidence">
+              <div class="ps-row">
+                <span class="ps-caption">EAS · Arbitrum Sepolia</span
+                ><img
+                  id="ps-proof-marker"
+                  class="ps-proof-marker"
+                  src="/brand/proof-point-card-marker.svg"
+                  width="24"
+                  height="24"
+                  alt="Recorded proof"
+                  hidden
+                />
+              </div>
+              <span class="ps-filename" id="ps-record-label">Ready to record</span>
+              <div class="ps-message">
+                <span class="ps-caption">Example recorded time</span
+                ><time class="ps-record-time" id="ps-record-time">Not recorded yet</time>
+              </div>
+              <span class="ps-caption">Recorded SHA-256</span
+              ><code class="ps-digest" id="ps-public-digest">Not recorded yet</code>
+            </article>
+            <div class="ps-side-note">Hash and blockchain metadata are public.</div>
+          </section>
+        </div>
+        <div class="ps-result" aria-live="polite" data-result="prepared">
+          <h3 id="ps-status">File prepared locally</h3>
+          <span id="ps-detail">The hash is ready. The original file is not uploaded.</span>
+        </div>
+        <p class="ps-scope">
+          A matching hash shows the same file bytes. It does not prove authorship, ownership, truth,
+          or when the content was created.
+        </p>
+        <footer class="ps-footer">
+          <span>Simulation · real sample hashes · no transaction</span
+          ><a
+            href="https://arbitrum-testnet.proofstamp.org/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Try the testnet app ↗</a
+          >
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

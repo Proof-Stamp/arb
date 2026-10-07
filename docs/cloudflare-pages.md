@@ -18,7 +18,19 @@ The custom domain is the stable testnet entry point. Temporary `*.pages.dev` dep
 - Node.js: 22 (`.nvmrc`)
 - Production branch after merge: `main`
 
-`public/_redirects` provides the SPA fallback. `public/_headers` sets baseline security headers, prevents stale HTML caching, disables caching for the local ProofStamp seal, and allows immutable caching for hashed Vite assets.
+`public/_redirects` normalizes the walkthrough URL. Cloudflare Pages provides the default SPA fallback because this build has no top-level `404.html`. `public/_headers` sets baseline security headers, prevents stale HTML caching, disables caching for the local ProofStamp seal, and allows immutable caching for hashed Vite assets.
+
+## Interactive walkthrough
+
+`public/walkthrough/` contains a standalone, branded simulation. Vite copies it to
+`dist/walkthrough/`. Cloudflare Pages serves this matching static index and its assets
+at `/walkthrough/`, using its built-in SPA fallback for unmatched app routes. No separate
+hosting project is required. See [Cloudflare route matching and SPA behavior](https://developers.cloudflare.com/pages/configuration/serving-pages/).
+
+The example uses real SHA-256 values for two fixed UTF-8 samples, but does not submit
+a transaction or accept user files. Its recorded time is explicitly simulated.
+After deployment, check all four steps and the README link at
+`https://arbitrum-testnet.proofstamp.org/walkthrough/`.
 
 ## Public environment variables
 

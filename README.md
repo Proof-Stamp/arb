@@ -3,15 +3,20 @@
 [![CI](https://github.com/Proof-Stamp/arb/actions/workflows/ci.yml/badge.svg)](https://github.com/Proof-Stamp/arb/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-<p align="center">
-  <img src="docs/assets/proofstamp-arbitrum-banner.svg" alt="ProofStamp via Arbitrum: create, record, verify" width="100%">
-</p>
-
 A small testnet prototype for creating independently verifiable evidence for a file without uploading the file itself.
 
 **Live testnet app:** https://arbitrum-testnet.proofstamp.org/
 
 > **Status:** prototype complete. This repository is a reference implementation on Arbitrum Sepolia, not a production service.
+
+## Explore the walkthrough
+
+See how a file hash is recorded and why an edited copy fails the comparison.
+This is a simulation with real sample hashes; it does not submit a transaction.
+
+[![ProofStamp walkthrough showing the original sample file matching its simulated public record](docs/assets/proofstamp-walkthrough.png)](https://arbitrum-testnet.proofstamp.org/walkthrough/)
+
+**[Explore the interactive walkthrough](https://arbitrum-testnet.proofstamp.org/walkthrough/)**
 
 ## What this prototype demonstrates
 

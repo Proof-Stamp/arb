@@ -22,3 +22,6 @@
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+/walkthrough/*
+  Cache-Control: no-cache, no-store, must-revalidate
