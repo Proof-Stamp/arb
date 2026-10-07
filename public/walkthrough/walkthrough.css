@@ -4,7 +4,7 @@
 }
 body {
   margin: 0;
-  padding: 32px 20px;
+  padding: 16px 20px;
   background: light-dark(#f4f6f8, #0e2344);
 }
 #ps-branded-demo {
@@ -39,7 +39,7 @@ body {
   justify-content: space-between;
   gap: 18px;
   flex-wrap: wrap;
-  padding: 24px 28px;
+  padding: 16px 24px;
   font-size: 12px;
 }
 #ps-branded-demo .ps-wordmark {
@@ -49,13 +49,13 @@ body {
   max-width: 100%;
 }
 #ps-branded-demo .ps-main {
-  padding: 28px;
+  padding: 18px 24px;
 }
 #ps-branded-demo .ps-intro {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 6px;
+  margin-bottom: 14px;
 }
 #ps-branded-demo .ps-eyebrow {
   font-size: 12px;
@@ -74,7 +74,7 @@ body {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.4;
-  margin: 0 0 12px;
+  margin: 0 0 8px;
   color: var(--ps-ink);
 }
 #ps-branded-demo .ps-secondary {
@@ -85,7 +85,7 @@ body {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 28px;
+  margin-bottom: 18px;
 }
 #ps-branded-demo .ps-step {
   appearance: none;
@@ -121,11 +121,11 @@ body {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   background: var(--ps-surface);
   border: 1px solid var(--ps-line);
   border-radius: 12px;
-  padding: 18px;
+  padding: 14px;
 }
 #ps-branded-demo .ps-row {
   display: flex;
@@ -149,8 +149,8 @@ body {
   flex-direction: column;
   justify-content: center;
   gap: 8px;
-  min-height: 96px;
-  padding: 12px 0;
+  min-height: 58px;
+  padding: 8px 0;
   border-top: 1px solid var(--ps-line);
   border-bottom: 1px solid var(--ps-line);
   font-size: 16px;
@@ -167,7 +167,7 @@ body {
   font:
     400 12px/1.7 'IBM Plex Mono',
     monospace;
-  min-height: 82px;
+  min-height: 42px;
   background: transparent;
   color: var(--ps-ink);
   padding: 0;
@@ -191,7 +191,7 @@ body {
 #ps-branded-demo .ps-side-note {
   font-size: 12px;
   color: var(--ps-muted);
-  margin-top: 12px;
+  margin-top: 8px;
   line-height: 1.5;
 }
 #ps-branded-demo .ps-connection {
@@ -199,7 +199,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding-top: 133px;
+  padding-top: 101px;
   font-size: 11px;
   color: var(--ps-link);
   text-align: center;
@@ -209,8 +209,8 @@ body {
 }
 #ps-branded-demo .ps-result {
   border-top: 1px solid var(--ps-line);
-  padding: 18px 0 0;
-  margin-top: 24px;
+  padding: 12px 0 0;
+  margin-top: 14px;
   font-size: 13px;
   line-height: 1.6;
 }
@@ -230,7 +230,7 @@ body {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  margin-top: 24px;
+  margin-top: 14px;
   font-size: 11px;
   line-height: 1.6;
   color: var(--ps-muted);
@@ -281,10 +281,94 @@ body {
   font-size: 12px;
   line-height: 1.6;
   color: var(--ps-muted);
-  margin: 20px 0 0;
+  margin: 10px 0 0;
 }
 @media (max-width: 580px) {
   body {
     padding: 12px 8px;
+  }
+}
+
+/* Keep the result and app link visible on shorter desktop viewports. */
+@media (min-width: 581px) and (max-height: 700px) {
+  body {
+    padding: 8px 20px;
+  }
+  #ps-branded-demo .ps-header {
+    padding: 12px 24px;
+  }
+  #ps-branded-demo .ps-main {
+    padding: 12px 24px;
+  }
+  #ps-branded-demo .ps-eyebrow {
+    display: none;
+  }
+  #ps-branded-demo .ps-intro {
+    margin-bottom: 10px;
+  }
+  #ps-branded-demo .ps-steps {
+    margin-bottom: 12px;
+  }
+  #ps-branded-demo .ps-message {
+    min-height: 48px;
+    padding: 6px 0;
+    gap: 4px;
+  }
+  #ps-branded-demo .ps-connection {
+    padding-top: 89px;
+  }
+  #ps-branded-demo .ps-result {
+    margin-top: 10px;
+    padding-top: 10px;
+  }
+  #ps-branded-demo .ps-scope {
+    margin-top: 8px;
+  }
+  #ps-branded-demo .ps-footer {
+    margin-top: 10px;
+  }
+}
+
+@media (min-width: 880px) and (max-height: 600px) {
+  body {
+    padding: 6px 20px;
+  }
+  #ps-branded-demo .ps-header {
+    padding: 10px 24px;
+  }
+  #ps-branded-demo .ps-main {
+    padding: 10px 24px;
+  }
+  #ps-branded-demo .ps-evidence {
+    gap: 6px;
+  }
+  #ps-branded-demo .ps-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 24px;
+  }
+  #ps-branded-demo .ps-intro {
+    align-self: center;
+    margin-bottom: 0;
+  }
+  #ps-branded-demo .ps-steps {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    gap: 6px;
+    margin-bottom: 0;
+  }
+  #ps-branded-demo .ps-step {
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+  #ps-branded-demo .ps-comparison,
+  #ps-branded-demo .ps-result,
+  #ps-branded-demo .ps-scope,
+  #ps-branded-demo .ps-footer,
+  #ps-branded-demo noscript {
+    grid-column: 1 / -1;
+  }
+  #ps-branded-demo .ps-comparison {
+    margin-top: 12px;
   }
 }

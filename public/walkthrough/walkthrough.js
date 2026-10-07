@@ -6,7 +6,8 @@
   const buttons = [...root.querySelectorAll('[data-step]')];
   const original = '18714e8fe0b77abba8767969e2b4907a36708b8132a746c1e55be674dc0a829d';
   const edited = 'dd80eee257d0d2c778ea212156b45cc360fa90e2a0a189adb0469f4ce1b57ed7';
-  const grouped = (h) => h.match(/.{1,16}/g).join('\n');
+  const grouped = (h) =>
+    h.match(root.getBoundingClientRect().width <= 580 ? /.{1,16}/g : /.{1,32}/g).join('\n');
   const states = [
     ['File prepared locally', 'The hash is ready. The original file is not uploaded.', 'prepared'],
     [
